@@ -1,6 +1,6 @@
 /* ============================================
-   GBC32 Portfolio — ULTIMATE GAMER EDITION
-   TV static, code rain, police tape, glow everything
+   GBC32 Portfolio — V3 OPTIMIZED + ENHANCED
+   Coin flip buttons, cracks, glints, infinite tape
    ============================================ */
 
 :root {
@@ -70,45 +70,32 @@ a { color: inherit; text-decoration: none; }
     border-radius: 50%;
     pointer-events: none;
     z-index: 9997;
-    background: radial-gradient(circle, rgba(255, 77, 0, 0.06) 0%, transparent 70%);
-    transform: translate(-50%, -50%);
-    transition: opacity 0.3s;
+    background: radial-gradient(circle, rgba(255, 77, 0, 0.07) 0%, transparent 70%);
+    will-change: transform;
     opacity: 0;
+    transition: opacity 0.3s;
 }
 body:hover .cursor-glow { opacity: 1; }
 
-/* ============ GLOW ON HOVER (universal) ============ */
+/* ============ GLOW ON HOVER ============ */
 .glow-hover {
     position: relative;
     transition: all 0.3s ease;
-}
-.glow-hover::before {
-    content: '';
-    position: absolute;
-    inset: -4px;
-    border-radius: inherit;
-    opacity: 0;
-    transition: opacity 0.3s;
-    z-index: -1;
 }
 .glow-hover:hover {
     text-shadow: 0 0 20px var(--accent-glow), 0 0 40px rgba(255, 77, 0, 0.15);
 }
 
-/* ============ SCANLINES ============ */
+/* ============ SCANLINES (lightweight) ============ */
 .scanlines {
     position: fixed;
     inset: 0;
     z-index: 9998;
     pointer-events: none;
     background: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 2px,
-        rgba(0, 0, 0, 0.04) 2px,
-        rgba(0, 0, 0, 0.04) 4px
+        0deg, transparent, transparent 2px,
+        rgba(0, 0, 0, 0.03) 2px, rgba(0, 0, 0, 0.03) 4px
     );
-    animation: scanlineFlicker 8s linear infinite;
 }
 
 /* ============ LOADER ============ */
@@ -122,11 +109,7 @@ body:hover .cursor-glow { opacity: 1; }
     justify-content: center;
     transition: opacity 0.6s ease, visibility 0.6s ease;
 }
-.loader.done {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-}
+.loader.done { opacity: 0; visibility: hidden; pointer-events: none; }
 
 .loader-static {
     position: absolute;
@@ -134,6 +117,7 @@ body:hover .cursor-glow { opacity: 1; }
     width: 100%;
     height: 100%;
     opacity: 0.04;
+    image-rendering: pixelated;
 }
 
 .loader-content { text-align: center; width: 240px; position: relative; z-index: 2; }
@@ -186,9 +170,7 @@ body:hover .cursor-glow { opacity: 1; }
 /* ============ NAVIGATION ============ */
 .nav {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
+    top: 0; left: 0; right: 0;
     z-index: 100;
     display: flex;
     justify-content: space-between;
@@ -231,10 +213,8 @@ body:hover .cursor-glow { opacity: 1; }
 .nav-links a::after {
     content: '';
     position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 0;
-    height: 2px;
+    bottom: 0; left: 0;
+    width: 0; height: 2px;
     background: var(--accent);
     box-shadow: 0 0 10px var(--accent-glow);
     transition: width 0.3s;
@@ -243,8 +223,7 @@ body:hover .cursor-glow { opacity: 1; }
 
 .nav-status { display: flex; align-items: center; gap: 8px; }
 .status-dot {
-    width: 8px;
-    height: 8px;
+    width: 8px; height: 8px;
     background: var(--green);
     border-radius: 50%;
     animation: statusPulse 2s ease infinite;
@@ -271,10 +250,10 @@ body:hover .cursor-glow { opacity: 1; }
 .hero-static-bg {
     position: absolute;
     inset: 0;
-    width: 100%;
-    height: 100%;
+    width: 100%; height: 100%;
     opacity: 0.06;
     z-index: 0;
+    image-rendering: pixelated;
 }
 
 .hero-grid-bg {
@@ -302,6 +281,7 @@ body:hover .cursor-glow { opacity: 1; }
     padding: 120px 48px;
     position: relative;
     z-index: 2;
+    will-change: transform, opacity;
 }
 
 .hero-terminal {
@@ -316,30 +296,24 @@ body:hover .cursor-glow { opacity: 1; }
 .terminal-prompt { color: var(--green); font-weight: 700; text-shadow: 0 0 10px var(--green-glow); }
 .terminal-cursor { animation: blink 1s step-end infinite; color: var(--accent); }
 
-/* Glitch text effect */
-.glitch-text {
-    position: relative;
-}
+/* Glitch text */
+.glitch-text { position: relative; }
 .glitch-text::before,
 .glitch-text::after {
     content: attr(data-text);
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
     z-index: -1;
 }
 .glitch-text::before {
     color: var(--cyan);
-    -webkit-text-stroke: 2px var(--cyan);
     animation: glitchBefore 4s infinite;
     clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
     opacity: 0.06;
 }
 .glitch-text::after {
     color: var(--accent);
-    -webkit-text-stroke: 2px var(--accent);
     animation: glitchAfter 4s infinite;
     clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%);
     opacity: 0.06;
@@ -369,8 +343,7 @@ body:hover .cursor-glow { opacity: 1; }
 
 .hero-line-deco {
     display: block;
-    width: 80px;
-    height: 2px;
+    width: 80px; height: 2px;
     background: linear-gradient(90deg, transparent, var(--accent), transparent);
     box-shadow: 0 0 12px var(--accent-glow);
     animation: lineGlow 2s ease infinite;
@@ -416,7 +389,6 @@ body:hover .cursor-glow { opacity: 1; }
     font-family: var(--font-mono);
     font-size: 18px;
     font-weight: 700;
-    color: var(--text);
 }
 .hero-stat-label {
     font-family: var(--font-mono);
@@ -445,8 +417,7 @@ body:hover .cursor-glow { opacity: 1; }
     color: var(--text-muted);
 }
 .scroll-line {
-    width: 1px;
-    height: 40px;
+    width: 1px; height: 40px;
     background: linear-gradient(to bottom, var(--accent), transparent);
     animation: scrollPulse 2s ease infinite;
     box-shadow: 0 0 8px var(--accent-glow);
@@ -454,8 +425,7 @@ body:hover .cursor-glow { opacity: 1; }
 
 .corner-deco {
     position: absolute;
-    width: 30px;
-    height: 30px;
+    width: 30px; height: 30px;
     border-color: var(--accent);
     border-style: solid;
     z-index: 2;
@@ -468,7 +438,7 @@ body:hover .cursor-glow { opacity: 1; }
 .bottom-left { bottom: 80px; left: 48px; border-width: 0 0 2px 2px; }
 .bottom-right { bottom: 80px; right: 48px; border-width: 0 2px 2px 0; }
 
-/* ============ DIAGONAL POLICE TAPE BANNER ============ */
+/* ============ DIAGONAL POLICE TAPE — INFINITE LOOP ============ */
 .tape-wrapper {
     position: relative;
     overflow: hidden;
@@ -483,34 +453,25 @@ body:hover .cursor-glow { opacity: 1; }
     padding: 12px 0;
     background: repeating-linear-gradient(
         -45deg,
-        var(--accent),
-        var(--accent) 10px,
-        #cc3d00 10px,
-        #cc3d00 20px
+        var(--accent), var(--accent) 10px,
+        #cc3d00 10px, #cc3d00 20px
     );
     border-top: 3px solid #ffaa00;
     border-bottom: 3px solid #ffaa00;
     box-shadow: 0 0 30px var(--accent-glow), 0 0 60px rgba(255, 77, 0, 0.15), inset 0 0 20px rgba(0, 0, 0, 0.3);
 }
 
-.tape-top {
-    transform: rotate(-2deg) scale(1.05);
-    margin-bottom: -8px;
-}
-
-.tape-bottom {
-    transform: rotate(2deg) scale(1.05);
-    margin-top: -8px;
-}
+.tape-top { transform: rotate(-2deg) scale(1.05); margin-bottom: -8px; }
+.tape-bottom { transform: rotate(2deg) scale(1.05); margin-top: -8px; }
 
 .tape-track {
     display: inline-flex;
     align-items: center;
-    gap: 0;
-    animation: tapeScroll 30s linear infinite;
+    animation: tapeScroll 20s linear infinite;
+    will-change: transform;
 }
 .tape-track-reverse {
-    animation: tapeScrollReverse 25s linear infinite;
+    animation: tapeScrollReverse 18s linear infinite;
 }
 
 .tape-btn {
@@ -525,7 +486,7 @@ body:hover .cursor-glow { opacity: 1; }
     transition: all 0.2s;
     cursor: pointer;
     text-decoration: none;
-    position: relative;
+    flex-shrink: 0;
 }
 .tape-btn:hover {
     color: #fff;
@@ -537,31 +498,43 @@ body:hover .cursor-glow { opacity: 1; }
 
 .tape-hazard {
     display: inline-block;
-    width: 30px;
-    height: 18px;
+    width: 30px; height: 18px;
     background: repeating-linear-gradient(
-        45deg,
-        transparent,
-        transparent 3px,
-        rgba(0, 0, 0, 0.25) 3px,
-        rgba(0, 0, 0, 0.25) 6px
+        45deg, transparent, transparent 3px,
+        rgba(0, 0, 0, 0.25) 3px, rgba(0, 0, 0, 0.25) 6px
     );
     margin: 0 4px;
     flex-shrink: 0;
 }
 
-/* ============ CODE RAIN BACKGROUND ============ */
+/* ============ PORTFOLIO SECTION ============ */
+.portfolio {
+    padding: 100px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+/* TV Static + Code Rain combined bg */
+.portfolio-static-bg {
+    position: absolute;
+    inset: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+    opacity: 0.03;
+    image-rendering: pixelated;
+}
+
 .code-rain-bg {
     position: absolute;
     inset: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 0;
-    opacity: 0.04;
+    width: 100%; height: 100%;
+    z-index: 1;
+    opacity: 0.06;
     pointer-events: none;
+    image-rendering: pixelated;
 }
 
-/* ============ SECTIONS ============ */
+/* ============ BENTO GRID ============ */
 .section-header { margin-bottom: 56px; }
 
 .section-tag {
@@ -584,13 +557,6 @@ body:hover .cursor-glow { opacity: 1; }
     background-clip: text;
 }
 
-/* ============ BENTO GRID ============ */
-.portfolio {
-    padding: 100px 0;
-    position: relative;
-    overflow: hidden;
-}
-
 .bento-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -605,8 +571,10 @@ body:hover .cursor-glow { opacity: 1; }
     position: relative;
     overflow: hidden;
     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform;
 }
 
+/* Card glow tracking */
 .card-glow {
     position: absolute;
     inset: 0;
@@ -617,6 +585,54 @@ body:hover .cursor-glow { opacity: 1; }
         rgba(255, 77, 0, 0.08) 0%, transparent 60%);
     pointer-events: none;
     z-index: 1;
+}
+
+/* ===== CRACK EFFECT ON HOVER ===== */
+.card-crack {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 3;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+/* Crack lines radiating from cursor */
+.card-crack::before {
+    content: '';
+    position: absolute;
+    left: var(--crack-x, 50%);
+    top: var(--crack-y, 50%);
+    width: 200px;
+    height: 200px;
+    transform: translate(-50%, -50%);
+    background:
+        /* Central cracks */
+        linear-gradient(15deg, transparent 47%, rgba(255,77,0,0.6) 47.5%, rgba(255,77,0,0.6) 48%, transparent 48.5%),
+        linear-gradient(-25deg, transparent 46%, rgba(0,255,204,0.4) 46.5%, rgba(0,255,204,0.4) 47%, transparent 47.5%),
+        linear-gradient(65deg, transparent 48%, rgba(255,77,0,0.5) 48.5%, rgba(255,77,0,0.5) 49%, transparent 49.5%),
+        linear-gradient(-50deg, transparent 47%, rgba(168,85,247,0.3) 47.5%, rgba(168,85,247,0.3) 48%, transparent 48.5%),
+        linear-gradient(120deg, transparent 49%, rgba(255,77,0,0.3) 49.2%, rgba(255,77,0,0.3) 49.5%, transparent 49.7%),
+        linear-gradient(-80deg, transparent 48%, rgba(0,255,204,0.25) 48.3%, rgba(0,255,204,0.25) 48.6%, transparent 49%),
+        linear-gradient(40deg, transparent 49%, rgba(255,200,0,0.2) 49.3%, rgba(255,200,0,0.2) 49.6%, transparent 50%);
+    filter: blur(0.3px);
+}
+
+/* Crack glow halo */
+.card-crack::after {
+    content: '';
+    position: absolute;
+    left: var(--crack-x, 50%);
+    top: var(--crack-y, 50%);
+    width: 120px;
+    height: 120px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(255,77,0,0.15) 0%, transparent 70%);
+    filter: blur(8px);
+}
+
+.bento-card:hover .card-crack {
+    opacity: 1;
 }
 
 .bento-card:hover {
@@ -649,8 +665,7 @@ body:hover .cursor-glow { opacity: 1; }
 
 .card-number {
     position: absolute;
-    top: 20px;
-    right: 24px;
+    top: 20px; right: 24px;
     font-family: var(--font-display);
     font-size: 72px;
     color: rgba(255, 255, 255, 0.015);
@@ -664,7 +679,7 @@ body:hover .cursor-glow { opacity: 1; }
     text-shadow: 0 0 40px rgba(255, 77, 0, 0.1);
 }
 
-.card-content { position: relative; z-index: 2; }
+.card-content { position: relative; z-index: 4; }
 
 .card-title {
     font-family: var(--font-heading);
@@ -685,12 +700,7 @@ body:hover .cursor-glow { opacity: 1; }
     margin-bottom: 20px;
 }
 
-.card-tags {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-bottom: 24px;
-}
+.card-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
 
 .tag {
     font-size: 11px;
@@ -715,38 +725,61 @@ body:hover .cursor-glow { opacity: 1; }
 .tag-red { color: var(--red); border-color: rgba(239,68,68,0.3); }
 .tag-red:hover { background: rgba(239,68,68,0.1); box-shadow: 0 0 15px rgba(239,68,68,0.3); }
 
+/* ===== CARD BUTTONS — ENHANCED WITH COIN FLIP + GLINT + RANDOM GLOW ===== */
 .card-btn {
     display: inline-block;
     font-family: var(--font-heading);
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
     letter-spacing: 3px;
-    padding: 10px 24px;
+    padding: 12px 28px;
     transition: all 0.3s;
-    border: none;
+    border: 2px solid transparent;
     cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    perspective: 600px;
+    transform-style: preserve-3d;
 }
+
+/* Glint/glare sweep on buttons */
+.card-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+    transform: skewX(-20deg);
+    transition: none;
+    animation: btnGlint 3s ease-in-out infinite;
+}
+
+/* Coin flip animation */
+.card-btn.coin-flipping {
+    animation: coinFlip 0.6s ease-in-out infinite;
+}
+
 .btn-orange {
     background: var(--accent);
     color: #fff;
-    box-shadow: 0 0 0 0 var(--accent-glow);
+    border-color: var(--accent);
 }
 .btn-orange:hover {
     background: #ff6622;
-    box-shadow: 0 0 25px var(--accent-glow), 0 4px 20px rgba(255, 77, 0, 0.2);
-    transform: translateY(-2px);
+    transform: translateY(-3px) scale(1.05);
 }
 .btn-cyan {
     background: var(--cyan);
     color: #000;
-    box-shadow: 0 0 0 0 var(--cyan-glow);
+    border-color: var(--cyan);
 }
 .btn-cyan:hover {
-    box-shadow: 0 0 25px var(--cyan-glow), 0 4px 20px rgba(0, 255, 204, 0.2);
-    transform: translateY(-2px);
+    transform: translateY(-3px) scale(1.05);
 }
 
-/* ============ CTA ============ */
+/* ============ CTA — ENHANCED WITH GLINT ============ */
 .cta {
     padding: 140px 0;
     text-align: center;
@@ -759,7 +792,7 @@ body:hover .cursor-glow { opacity: 1; }
     content: '';
     position: absolute;
     inset: 0;
-    background: radial-gradient(ellipse at center, rgba(255, 77, 0, 0.04) 0%, transparent 60%);
+    background: radial-gradient(ellipse at center, rgba(255, 77, 0, 0.06) 0%, transparent 60%);
 }
 
 .cta-title {
@@ -773,8 +806,8 @@ body:hover .cursor-glow { opacity: 1; }
     transition: all 0.3s;
 }
 .cta-title:hover {
-    -webkit-text-stroke: 1px rgba(255, 77, 0, 0.4);
-    text-shadow: 0 0 60px rgba(255, 77, 0, 0.1);
+    -webkit-text-stroke: 1px rgba(255, 77, 0, 0.5);
+    text-shadow: 0 0 80px rgba(255, 77, 0, 0.15);
 }
 
 .cta-btn {
@@ -783,20 +816,40 @@ body:hover .cursor-glow { opacity: 1; }
     font-size: 16px;
     font-weight: 700;
     letter-spacing: 4px;
-    padding: 18px 56px;
+    padding: 20px 60px;
     background: var(--accent);
     color: #fff;
     transition: all 0.3s;
     cursor: pointer;
-    border: none;
+    border: 2px solid var(--accent);
+    position: relative;
+    overflow: hidden;
 }
+
+/* CTA glint sweep */
+.cta-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -120%;
+    width: 80%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
+    transform: skewX(-20deg);
+}
+.cta-btn.glint-sweep::before {
+    animation: ctaGlint 0.8s ease-out forwards;
+}
+
 .pulse-glow {
     animation: pulseGlow 2s ease infinite;
 }
 .cta-btn:hover {
     background: #ff6622;
     box-shadow: 0 0 50px var(--accent-glow), 0 0 100px rgba(255, 77, 0, 0.15);
-    transform: translateY(-3px) scale(1.02);
+    transform: translateY(-3px) scale(1.03);
+    border-color: #ffaa00;
+    text-shadow: 0 0 10px rgba(255,255,255,0.5);
 }
 
 /* ============ ABOUT ============ */
@@ -861,7 +914,7 @@ body:hover .cursor-glow { opacity: 1; }
 .code-keyword { color: var(--purple); text-shadow: 0 0 10px var(--purple-glow); }
 .code-string { color: var(--green); text-shadow: 0 0 10px var(--green-glow); }
 
-/* Stats Cards */
+/* Stats */
 .about-stats-col {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -964,13 +1017,8 @@ body:hover .cursor-glow { opacity: 1; }
     transform: translateY(-4px);
     box-shadow: 0 0 30px rgba(255, 77, 0, 0.1), 0 12px 32px rgba(0, 0, 0, 0.3);
 }
-.contact-card-icon {
-    font-size: 28px;
-    transition: transform 0.3s;
-}
-.contact-card:hover .contact-card-icon {
-    transform: scale(1.2);
-}
+.contact-card-icon { font-size: 28px; transition: transform 0.3s; }
+.contact-card:hover .contact-card-icon { transform: scale(1.2); }
 .contact-card-label {
     display: block;
     font-family: var(--font-mono);
@@ -1090,16 +1138,29 @@ body:hover .cursor-glow { opacity: 1; }
     92% { transform: translate(-3px, 1px); }
     93% { transform: translate(1px, -1px); }
 }
-@keyframes scanlineFlicker {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.98; }
-    92% { opacity: 1; }
-    93% { opacity: 0.94; }
-    94% { opacity: 1; }
-}
 @keyframes pulseGlow {
     0%, 100% { box-shadow: 0 0 20px rgba(255, 77, 0, 0.2); }
-    50% { box-shadow: 0 0 40px rgba(255, 77, 0, 0.4), 0 0 80px rgba(255, 77, 0, 0.1); }
+    50% { box-shadow: 0 0 40px rgba(255, 77, 0, 0.5), 0 0 80px rgba(255, 77, 0, 0.15); }
+}
+
+/* Button glint sweep */
+@keyframes btnGlint {
+    0% { left: -100%; }
+    40% { left: 120%; }
+    100% { left: 120%; }
+}
+
+/* CTA glint */
+@keyframes ctaGlint {
+    0% { left: -120%; }
+    100% { left: 150%; }
+}
+
+/* Coin flip */
+@keyframes coinFlip {
+    0% { transform: perspective(600px) rotateY(0deg) translateY(-3px) scale(1.05); }
+    50% { transform: perspective(600px) rotateY(180deg) translateY(-3px) scale(1.05); }
+    100% { transform: perspective(600px) rotateY(360deg) translateY(-3px) scale(1.05); }
 }
 
 /* ============ SCROLL REVEAL ============ */

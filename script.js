@@ -1,111 +1,188 @@
-// ============ TV STATIC CANVAS ============
+// ============ PERFORMANCE: THROTTLED TV STATIC ============
+// Renders at low-res then CSS scales up — 10fps instead of 60
 function createStaticCanvas(canvasId) {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { alpha: false });
+    // Render at 1/4 resolution for performance
+    const SCALE = 4;
+    let w = 0, h = 0;
+    let imageData = null;
 
     function resize() {
-        canvas.width = canvas.offsetWidth;
-        canvas.height = canvas.offsetHeight;
+        w = Math.ceil(canvas.offsetWidth / SCALE);
+        h = Math.ceil(canvas.offsetHeight / SCALE);
+        canvas.width = w;
+        canvas.height = h;
+        imageData = ctx.createImageData(w, h);
     }
     resize();
     window.addEventListener('resize', resize);
 
-    function drawStatic() {
-        const w = canvas.width;
-        const h = canvas.height;
-        const imageData = ctx.createImageData(w, h);
+    let lastFrame = 0;
+    function drawStatic(time) {
+        requestAnimationFrame(drawStatic);
+        if (time - lastFrame < 100) return; // 10fps cap
+        lastFrame = time;
         const data = imageData.data;
-        for (let i = 0; i < data.length; i += 4) {
-            const v = Math.random() * 255;
-            data[i] = v;
-            data[i + 1] = v;
-            data[i + 2] = v;
-            data[i + 3] = 255;
+        for (let i = 0; i < data.length; i += 16) { // Skip pixels for speed
+            const v = (Math.random() * 255) | 0;
+            data[i] = v; data[i+1] = v; data[i+2] = v; data[i+3] = 255;
+            // Fill 4 pixels at once
+            if (i+4 < data.length) { data[i+4] = v; data[i+5] = v; data[i+6] = v; data[i+7] = 255; }
+            if (i+8 < data.length) { data[i+8] = v; data[i+9] = v; data[i+10] = v; data[i+11] = 255; }
+            if (i+12 < data.length) { data[i+12] = v; data[i+13] = v; data[i+14] = v; data[i+15] = 255; }
         }
         ctx.putImageData(imageData, 0, 0);
-        requestAnimationFrame(drawStatic);
     }
-    drawStatic();
+    requestAnimationFrame(drawStatic);
 }
 
 createStaticCanvas('loaderStatic');
 createStaticCanvas('heroStatic');
+createStaticCanvas('portfolioStatic');
 
-// ============ CODE RAIN CANVAS ============
+// ============ OPTIMIZED CODE RAIN — 20fps ============
 function createCodeRain(canvasId) {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
 
     function resize() {
-        canvas.width = canvas.offsetWidth;
-        canvas.height = canvas.offsetHeight;
+        canvas.width = canvas.offsetWidth / 2; // Half-res
+        canvas.height = canvas.offsetHeight / 2;
     }
     resize();
     window.addEventListener('resize', resize);
 
-    const chars = 'local function end if then else return true false nil for in do while repeat until and or not table string math game workspace Players Lighting ReplicatedStorage ServerScriptService 01{}()=<>+-*/';
-    const fontSize = 14;
+    const chars = 'ローカル関数戻り値真偽01{}()=<>+-*/ABCDEFlocal function return if then end';
+    const fontSize = 10;
     const columns = Math.floor(canvas.width / fontSize);
-    const drops = Array(columns).fill(1);
+    const drops = Array(columns).fill(0).map(() => Math.random() * -20 | 0);
 
-    function draw() {
-        ctx.fillStyle = 'rgba(6, 6, 8, 0.06)';
+    let lastFrame = 0;
+    function draw(time) {
+        requestAnimationFrame(draw);
+        if (time - lastFrame < 50) return; // 20fps cap
+        lastFrame = time;
+
+        ctx.fillStyle = 'rgba(6, 6, 8, 0.08)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        ctx.fillStyle = '#ff4d00';
-        ctx.font = fontSize + 'px JetBrains Mono, monospace';
+        ctx.font = fontSize + 'px monospace';
 
         for (let i = 0; i < drops.length; i++) {
-            const char = chars[Math.floor(Math.random() * chars.length)];
+            const char = chars[(Math.random() * chars.length) | 0];
             const x = i * fontSize;
             const y = drops[i] * fontSize;
 
-            ctx.globalAlpha = 0.15 + Math.random() * 0.15;
+            // Brighter at head, dimmer trail
+            const brightness = Math.random();
+            if (brightness > 0.92) {
+                ctx.fillStyle = '#00ffcc'; // Bright cyan head
+                ctx.globalAlpha = 0.6;
+            } else {
+                ctx.fillStyle = '#ff4d00';
+                ctx.globalAlpha = 0.12 + Math.random() * 0.12;
+            }
             ctx.fillText(char, x, y);
-            ctx.globalAlpha = 1;
 
             if (y > canvas.height && Math.random() > 0.975) {
                 drops[i] = 0;
             }
             drops[i]++;
         }
-        requestAnimationFrame(draw);
+        ctx.globalAlpha = 1;
     }
-    draw();
+    requestAnimationFrame(draw);
 }
 
 createCodeRain('codeRain');
 createCodeRain('codeRain2');
 
-// ============ CURSOR GLOW ============
+// ============ CURSOR GLOW (throttled) ============
 const cursorGlow = document.getElementById('cursorGlow');
 if (cursorGlow) {
-    document.addEventListener('mousemove', (e) => {
-        cursorGlow.style.left = e.clientX + 'px';
-        cursorGlow.style.top = e.clientY + 'px';
-    });
+    let mx = 0, my = 0, cx = 0, cy = 0;
+    document.addEventListener('mousemove', (e) => { mx = e.clientX; my = e.clientY; }, { passive: true });
+    // Smooth follow at 60fps via rAF instead of per-mousemove
+    (function followCursor() {
+        cx += (mx - cx) * 0.15;
+        cy += (my - cy) * 0.15;
+        cursorGlow.style.transform = `translate(${cx - 200}px, ${cy - 200}px)`;
+        requestAnimationFrame(followCursor);
+    })();
 }
 
-// ============ CARD GLOW TRACKING ============
+// ============ CARD GLOW + TILT + CRACKS ============
+const glowColors = ['#ff4d00','#00ffcc','#a855f7','#3b82f6','#22c55e','#ef4444','#eab308','#ff00ff','#00ff88'];
+
 document.querySelectorAll('.bento-card').forEach(card => {
+    const crackOverlay = card.querySelector('.card-crack');
+
     card.addEventListener('mousemove', (e) => {
         const rect = card.getBoundingClientRect();
         const x = ((e.clientX - rect.left) / rect.width) * 100;
         const y = ((e.clientY - rect.top) / rect.height) * 100;
         card.style.setProperty('--glow-x', x + '%');
         card.style.setProperty('--glow-y', y + '%');
+        card.style.setProperty('--crack-x', x + '%');
+        card.style.setProperty('--crack-y', y + '%');
 
-        // Tilt
-        const tiltX = ((e.clientX - rect.left) / rect.width - 0.5) * 6;
-        const tiltY = ((e.clientY - rect.top) / rect.height - 0.5) * -6;
-        card.style.transform = `perspective(800px) rotateY(${tiltX}deg) rotateX(${tiltY}deg) translateY(-4px)`;
+        const tiltX = ((e.clientX - rect.left) / rect.width - 0.5) * 8;
+        const tiltY = ((e.clientY - rect.top) / rect.height - 0.5) * -8;
+        card.style.transform = `perspective(800px) rotateY(${tiltX}deg) rotateX(${tiltY}deg) translateY(-6px)`;
     });
     card.addEventListener('mouseleave', () => {
         card.style.transform = '';
     });
 });
+
+// ============ CARD BUTTON EFFECTS — COIN FLIP + RANDOM GLOW ============
+document.querySelectorAll('.card-btn').forEach(btn => {
+    let flipTimeout = null;
+
+    btn.addEventListener('mouseenter', () => {
+        // Start coin flip
+        btn.classList.add('coin-flipping');
+        // Random glow color cycle
+        const interval = setInterval(() => {
+            const color = glowColors[(Math.random() * glowColors.length) | 0];
+            btn.style.setProperty('--btn-glow', color);
+            btn.style.borderColor = color;
+            btn.style.boxShadow = `0 0 20px ${color}, 0 0 40px ${color}44, inset 0 0 15px ${color}22`;
+        }, 200);
+
+        flipTimeout = setTimeout(() => {
+            btn.classList.remove('coin-flipping');
+            clearInterval(interval);
+            btn.style.borderColor = '';
+            btn.style.boxShadow = '';
+        }, 5000);
+
+        btn._glowInterval = interval;
+    });
+
+    btn.addEventListener('mouseleave', () => {
+        btn.classList.remove('coin-flipping');
+        if (flipTimeout) clearTimeout(flipTimeout);
+        if (btn._glowInterval) clearInterval(btn._glowInterval);
+        btn.style.borderColor = '';
+        btn.style.boxShadow = '';
+        btn.style.setProperty('--btn-glow', '');
+    });
+});
+
+// ============ CTA BUTTON ENHANCED — GLINT SWEEP ============
+const ctaBtn = document.querySelector('.cta-btn');
+if (ctaBtn) {
+    // Continuous glint
+    setInterval(() => {
+        ctaBtn.classList.remove('glint-sweep');
+        void ctaBtn.offsetWidth; // Force reflow
+        ctaBtn.classList.add('glint-sweep');
+    }, 3000);
+}
 
 // ============ LOADING SCREEN ============
 const loader = document.getElementById('loader');
@@ -146,7 +223,7 @@ const loadInterval = setInterval(() => {
     loaderFill.style.width = progress + '%';
 }, 80);
 
-// ============ TERMINAL TYPING ANIMATION ============
+// ============ TERMINAL TYPING ============
 const terminalEl = document.getElementById('terminalText');
 const commands = [
     'cat skills.lua',
@@ -157,30 +234,27 @@ const commands = [
     'npm run build && ship',
     'test --combat --vfx --ui'
 ];
-let cmdIndex = 0;
-let charIndex = 0;
-let deleting = false;
+let cmdIdx = 0, charIdx = 0, isDeleting = false;
 
 function typeCommand() {
     if (!terminalEl) return;
-    const current = commands[cmdIndex];
-
-    if (!deleting) {
-        terminalEl.textContent = current.substring(0, charIndex);
-        charIndex++;
-        if (charIndex > current.length) {
-            deleting = true;
+    const current = commands[cmdIdx];
+    if (!isDeleting) {
+        terminalEl.textContent = current.substring(0, charIdx);
+        charIdx++;
+        if (charIdx > current.length) {
+            isDeleting = true;
             setTimeout(typeCommand, 2000);
             return;
         }
         setTimeout(typeCommand, 50 + Math.random() * 50);
     } else {
-        terminalEl.textContent = current.substring(0, charIndex);
-        charIndex--;
-        if (charIndex < 0) {
-            deleting = false;
-            charIndex = 0;
-            cmdIndex = (cmdIndex + 1) % commands.length;
+        terminalEl.textContent = current.substring(0, charIdx);
+        charIdx--;
+        if (charIdx < 0) {
+            isDeleting = false;
+            charIdx = 0;
+            cmdIdx = (cmdIdx + 1) % commands.length;
             setTimeout(typeCommand, 300);
             return;
         }
@@ -189,13 +263,23 @@ function typeCommand() {
 }
 setTimeout(typeCommand, 1200);
 
-// ============ NAV SCROLL EFFECT ============
+// ============ NAV SCROLL (single passive listener) ============
+let ticking = false;
 window.addEventListener('scroll', () => {
-    const y = window.scrollY;
-    if (y > 80) {
-        nav.classList.add('scrolled');
-    } else {
-        nav.classList.remove('scrolled');
+    if (!ticking) {
+        requestAnimationFrame(() => {
+            const y = window.scrollY;
+            nav.classList.toggle('scrolled', y > 80);
+
+            // Parallax hero (GPU-accelerated)
+            const hero = document.querySelector('.hero-content');
+            if (hero) {
+                hero.style.transform = `translate3d(0, ${y * 0.12}px, 0)`;
+                hero.style.opacity = Math.max(0, 1 - y / 800);
+            }
+            ticking = false;
+        });
+        ticking = true;
     }
 }, { passive: true });
 
@@ -206,40 +290,27 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         const href = anchor.getAttribute('href');
         if (href === '#') return;
         const target = document.querySelector(href);
-        if (target) {
-            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
 });
 
-// ============ SCROLL REVEAL WITH STAGGER ============
-const revealElements = document.querySelectorAll('.reveal');
-
+// ============ SCROLL REVEAL ============
 const revealObserver = new IntersectionObserver((entries) => {
     entries.forEach((entry, i) => {
         if (entry.isIntersecting) {
-            setTimeout(() => {
-                entry.target.classList.add('visible');
-            }, i * 100);
+            setTimeout(() => entry.target.classList.add('visible'), i * 80);
             revealObserver.unobserve(entry.target);
         }
     });
-}, {
-    threshold: 0.1,
-    rootMargin: '0px 0px -60px 0px'
-});
+}, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
+document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
-revealElements.forEach(el => revealObserver.observe(el));
-
-// ============ ACTIVE NAV LINK ============
-const sections = document.querySelectorAll('section[id]');
-const navLinks = document.querySelectorAll('.nav-links a');
-
+// ============ ACTIVE NAV ============
 const sectionObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
             const id = entry.target.getAttribute('id');
-            navLinks.forEach(link => {
+            document.querySelectorAll('.nav-links a').forEach(link => {
                 link.style.color = '';
                 link.style.textShadow = '';
                 if (link.getAttribute('href') === '#' + id) {
@@ -250,44 +321,15 @@ const sectionObserver = new IntersectionObserver((entries) => {
         }
     });
 }, { threshold: 0.3 });
+document.querySelectorAll('section[id]').forEach(s => sectionObserver.observe(s));
 
-sections.forEach(section => sectionObserver.observe(section));
-
-// ============ PARALLAX ON SCROLL ============
-window.addEventListener('scroll', () => {
-    const scrollY = window.scrollY;
-    const hero = document.querySelector('.hero-content');
-    if (hero) {
-        hero.style.transform = `translateY(${scrollY * 0.15}px)`;
-        hero.style.opacity = Math.max(0, 1 - scrollY / 800);
-    }
-}, { passive: true });
-
-// ============ MAGNETIC BUTTONS ============
-document.querySelectorAll('.card-btn, .cta-btn, .contact-card').forEach(btn => {
-    btn.addEventListener('mousemove', (e) => {
-        const rect = btn.getBoundingClientRect();
-        const x = e.clientX - rect.left - rect.width / 2;
-        const y = e.clientY - rect.top - rect.height / 2;
-        btn.style.transform = `translate(${x * 0.15}px, ${y * 0.15}px)`;
-    });
-    btn.addEventListener('mouseleave', () => {
-        btn.style.transform = '';
-    });
-});
-
-// ============ TAG HOVER RIPPLE ============
+// ============ TAG HOVER ============
 document.querySelectorAll('.tag').forEach(tag => {
-    tag.addEventListener('mouseenter', () => {
-        tag.style.transform = 'translateY(-2px) scale(1.05)';
-    });
-    tag.addEventListener('mouseleave', () => {
-        tag.style.transform = '';
-    });
+    tag.addEventListener('mouseenter', () => { tag.style.transform = 'translateY(-2px) scale(1.05)'; });
+    tag.addEventListener('mouseleave', () => { tag.style.transform = ''; });
 });
 
-// ============ STAT COUNTER ANIMATION ============
-const statValues = document.querySelectorAll('.stat-value');
+// ============ STAT COUNTER ============
 const statObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -295,23 +337,17 @@ const statObserver = new IntersectionObserver((entries) => {
             const text = el.textContent;
             const num = parseInt(text.replace(/[^0-9]/g, ''));
             if (isNaN(num) || num === 0) return;
-
             const suffix = text.replace(/[0-9,]/g, '');
             const hasComma = text.includes(',');
             let current = 0;
             const step = Math.max(1, Math.floor(num / 40));
             const interval = setInterval(() => {
                 current += step;
-                if (current >= num) {
-                    current = num;
-                    clearInterval(interval);
-                }
-                let display = hasComma ? current.toLocaleString() : current.toString();
-                el.textContent = display + suffix;
+                if (current >= num) { current = num; clearInterval(interval); }
+                el.textContent = (hasComma ? current.toLocaleString() : current) + suffix;
             }, 30);
             statObserver.unobserve(el);
         }
     });
 }, { threshold: 0.5 });
-
-statValues.forEach(el => statObserver.observe(el));
+document.querySelectorAll('.stat-value').forEach(el => statObserver.observe(el));
