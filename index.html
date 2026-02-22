@@ -14,26 +14,30 @@
     <!-- Loading Screen -->
     <div class="loader" id="loader">
         <div class="loader-content">
-            <div class="loader-logo">&lt;GBC32 /&gt;</div>
+            <div class="loader-glitch" data-text="<GBC32 />">&lt;GBC32 /&gt;</div>
             <div class="loader-percent" id="loaderPercent">0%</div>
             <div class="loader-bar">
                 <div class="loader-fill" id="loaderFill"></div>
             </div>
             <div class="loader-text" id="loaderText">Initializing...</div>
         </div>
+        <canvas id="loaderStatic" class="loader-static"></canvas>
     </div>
 
     <!-- Scan Lines Overlay -->
     <div class="scanlines"></div>
 
+    <!-- Cursor Glow -->
+    <div class="cursor-glow" id="cursorGlow"></div>
+
     <!-- Navigation -->
     <nav class="nav" id="nav">
-        <a href="#" class="nav-logo">&lt;GBC32 /&gt;</a>
+        <a href="#" class="nav-logo glow-hover">&lt;GBC32 /&gt;</a>
         <div class="nav-links">
-            <a href="#home">Home</a>
-            <a href="#portfolio">Portfolio</a>
-            <a href="#about">About</a>
-            <a href="#contact">Contact</a>
+            <a href="#home" class="glow-hover">Home</a>
+            <a href="#portfolio" class="glow-hover">Portfolio</a>
+            <a href="#about" class="glow-hover">About</a>
+            <a href="#contact" class="glow-hover">Contact</a>
         </div>
         <div class="nav-status">
             <span class="status-dot"></span>
@@ -43,12 +47,14 @@
 
     <!-- Hero Section -->
     <section class="hero" id="home">
+        <canvas id="heroStatic" class="hero-static-bg"></canvas>
         <div class="hero-grid-bg"></div>
+        <div class="hero-vignette"></div>
         <div class="hero-content">
             <div class="hero-terminal">
                 <span class="terminal-prompt">$</span> <span class="terminal-typed" id="terminalText"></span><span class="terminal-cursor">_</span>
             </div>
-            <h1 class="hero-title">ROBLOX</h1>
+            <h1 class="hero-title glitch-text" data-text="ROBLOX">ROBLOX</h1>
             <div class="hero-subtitle">
                 <span class="hero-line-deco"></span>
                 <span class="hero-diamond">&#9670;</span>
@@ -57,17 +63,17 @@
                 <span class="hero-line-deco"></span>
             </div>
             <div class="hero-stats">
-                <div class="hero-stat">
+                <div class="hero-stat glow-hover">
                     <span class="hero-stat-value">5+</span>
                     <span class="hero-stat-label">YRS EXP</span>
                 </div>
                 <div class="hero-stat-sep">|</div>
-                <div class="hero-stat">
+                <div class="hero-stat glow-hover">
                     <span class="hero-stat-value">1,360</span>
                     <span class="hero-stat-label">LINES/SCRIPT</span>
                 </div>
                 <div class="hero-stat-sep">|</div>
-                <div class="hero-stat">
+                <div class="hero-stat glow-hover">
                     <span class="hero-stat-value">60fps</span>
                     <span class="hero-stat-label">ON MOBILE</span>
                 </div>
@@ -77,54 +83,84 @@
             <span class="scroll-text">SCROLL</span>
             <div class="scroll-line"></div>
         </div>
-        <!-- Corner decorations -->
         <div class="corner-deco top-left"></div>
         <div class="corner-deco top-right"></div>
         <div class="corner-deco bottom-left"></div>
         <div class="corner-deco bottom-right"></div>
     </section>
 
-    <!-- Scrolling Banner -->
-    <div class="banner">
-        <div class="banner-track">
-            <span>ROBLOX DEVELOPMENT</span>
-            <span class="banner-dot">&bull;</span>
-            <span>COMBAT SYSTEMS</span>
-            <span class="banner-dot">&bull;</span>
-            <span>SCRIPTING</span>
-            <span class="banner-dot">&bull;</span>
-            <span>UI/UX</span>
-            <span class="banner-dot">&bull;</span>
-            <span>VFX</span>
-            <span class="banner-dot">&bull;</span>
-            <span>GAME DESIGN</span>
-            <span class="banner-dot">&bull;</span>
-            <span>ROBLOX DEVELOPMENT</span>
-            <span class="banner-dot">&bull;</span>
-            <span>COMBAT SYSTEMS</span>
-            <span class="banner-dot">&bull;</span>
-            <span>SCRIPTING</span>
-            <span class="banner-dot">&bull;</span>
-            <span>UI/UX</span>
-            <span class="banner-dot">&bull;</span>
-            <span>VFX</span>
-            <span class="banner-dot">&bull;</span>
-            <span>GAME DESIGN</span>
-            <span class="banner-dot">&bull;</span>
+    <!-- DIAGONAL POLICE TAPE BANNER -->
+    <div class="tape-wrapper">
+        <div class="tape tape-top">
+            <div class="tape-track">
+                <a href="#portfolio" class="tape-btn">ROBLOX DEVELOPMENT</a>
+                <span class="tape-hazard"></span>
+                <a href="#portfolio" class="tape-btn">COMBAT SYSTEMS</a>
+                <span class="tape-hazard"></span>
+                <a href="#portfolio" class="tape-btn">SCRIPTING</a>
+                <span class="tape-hazard"></span>
+                <a href="#contact" class="tape-btn">UI/UX</a>
+                <span class="tape-hazard"></span>
+                <a href="#portfolio" class="tape-btn">VFX</a>
+                <span class="tape-hazard"></span>
+                <a href="#contact" class="tape-btn">GAME DESIGN</a>
+                <span class="tape-hazard"></span>
+                <a href="#portfolio" class="tape-btn">ROBLOX DEVELOPMENT</a>
+                <span class="tape-hazard"></span>
+                <a href="#portfolio" class="tape-btn">COMBAT SYSTEMS</a>
+                <span class="tape-hazard"></span>
+                <a href="#portfolio" class="tape-btn">SCRIPTING</a>
+                <span class="tape-hazard"></span>
+                <a href="#contact" class="tape-btn">UI/UX</a>
+                <span class="tape-hazard"></span>
+                <a href="#portfolio" class="tape-btn">VFX</a>
+                <span class="tape-hazard"></span>
+                <a href="#contact" class="tape-btn">GAME DESIGN</a>
+                <span class="tape-hazard"></span>
+            </div>
+        </div>
+        <div class="tape tape-bottom">
+            <div class="tape-track tape-track-reverse">
+                <a href="#about" class="tape-btn">HIRE ME</a>
+                <span class="tape-hazard"></span>
+                <a href="#about" class="tape-btn">LUAU EXPERT</a>
+                <span class="tape-hazard"></span>
+                <a href="#contact" class="tape-btn">DM ON DISCORD</a>
+                <span class="tape-hazard"></span>
+                <a href="#portfolio" class="tape-btn">ANTI-EXPLOIT</a>
+                <span class="tape-hazard"></span>
+                <a href="#about" class="tape-btn">SERVER-AUTH</a>
+                <span class="tape-hazard"></span>
+                <a href="#portfolio" class="tape-btn">60FPS MOBILE</a>
+                <span class="tape-hazard"></span>
+                <a href="#about" class="tape-btn">HIRE ME</a>
+                <span class="tape-hazard"></span>
+                <a href="#about" class="tape-btn">LUAU EXPERT</a>
+                <span class="tape-hazard"></span>
+                <a href="#contact" class="tape-btn">DM ON DISCORD</a>
+                <span class="tape-hazard"></span>
+                <a href="#portfolio" class="tape-btn">ANTI-EXPLOIT</a>
+                <span class="tape-hazard"></span>
+                <a href="#about" class="tape-btn">SERVER-AUTH</a>
+                <span class="tape-hazard"></span>
+                <a href="#portfolio" class="tape-btn">60FPS MOBILE</a>
+                <span class="tape-hazard"></span>
+            </div>
         </div>
     </div>
 
     <!-- Portfolio Section -->
     <section class="portfolio" id="portfolio">
+        <canvas id="codeRain" class="code-rain-bg"></canvas>
         <div class="container">
-            <div class="section-header">
+            <div class="section-header reveal">
                 <div class="section-tag">// SELECTED WORK</div>
                 <h2 class="section-title">PORTFOLIO</h2>
             </div>
 
             <div class="bento-grid">
-                <!-- Large Card -->
                 <div class="bento-card bento-large reveal">
+                    <div class="card-glow"></div>
                     <div class="card-badge badge-orange">COMMISSION</div>
                     <div class="card-number">01</div>
                     <div class="card-content">
@@ -135,12 +171,12 @@
                             <span class="tag tag-purple">#UI Design</span>
                             <span class="tag tag-cyan">#VFX</span>
                         </div>
-                        <a href="#" class="card-btn btn-orange">VIEW PROJECT &rarr;</a>
+                        <a href="#" class="card-btn btn-orange glow-hover">VIEW PROJECT &rarr;</a>
                     </div>
                 </div>
 
-                <!-- Small Card -->
                 <div class="bento-card bento-small reveal">
+                    <div class="card-glow"></div>
                     <div class="card-badge badge-green">SYSTEMS</div>
                     <div class="card-number">02</div>
                     <div class="card-content">
@@ -151,12 +187,12 @@
                             <span class="tag tag-orange">#Combat</span>
                             <span class="tag tag-blue">#AI</span>
                         </div>
-                        <a href="#" class="card-btn btn-cyan">VIEW PROJECT &rarr;</a>
+                        <a href="#" class="card-btn btn-cyan glow-hover">VIEW PROJECT &rarr;</a>
                     </div>
                 </div>
 
-                <!-- Small Card -->
                 <div class="bento-card bento-small reveal">
+                    <div class="card-glow"></div>
                     <div class="card-badge badge-purple">COMBAT</div>
                     <div class="card-number">03</div>
                     <div class="card-content">
@@ -167,12 +203,12 @@
                             <span class="tag tag-red">#AntiCheat</span>
                             <span class="tag tag-orange">#Networking</span>
                         </div>
-                        <a href="#" class="card-btn btn-orange">VIEW PROJECT &rarr;</a>
+                        <a href="#" class="card-btn btn-orange glow-hover">VIEW PROJECT &rarr;</a>
                     </div>
                 </div>
 
-                <!-- Large Card -->
                 <div class="bento-card bento-large reveal">
+                    <div class="card-glow"></div>
                     <div class="card-badge badge-orange">GAME</div>
                     <div class="card-number">04</div>
                     <div class="card-content">
@@ -184,12 +220,12 @@
                             <span class="tag tag-cyan">#VFX</span>
                             <span class="tag tag-green">#Systems</span>
                         </div>
-                        <a href="#" class="card-btn btn-orange">VIEW PROJECT &rarr;</a>
+                        <a href="#" class="card-btn btn-orange glow-hover">VIEW PROJECT &rarr;</a>
                     </div>
                 </div>
 
-                <!-- Medium Card -->
                 <div class="bento-card bento-medium reveal">
+                    <div class="card-glow"></div>
                     <div class="card-badge badge-green">SCRIPTING</div>
                     <div class="card-number">05</div>
                     <div class="card-content">
@@ -199,12 +235,12 @@
                             <span class="tag tag-green">#OOP</span>
                             <span class="tag tag-orange">#Modular</span>
                         </div>
-                        <a href="#" class="card-btn btn-cyan">VIEW PROJECT &rarr;</a>
+                        <a href="#" class="card-btn btn-cyan glow-hover">VIEW PROJECT &rarr;</a>
                     </div>
                 </div>
 
-                <!-- Medium Card -->
                 <div class="bento-card bento-medium reveal">
+                    <div class="card-glow"></div>
                     <div class="card-badge badge-cyan">3D PIPELINE</div>
                     <div class="card-number">06</div>
                     <div class="card-content">
@@ -215,7 +251,7 @@
                             <span class="tag tag-purple">#AI</span>
                             <span class="tag tag-blue">#Pipeline</span>
                         </div>
-                        <a href="#" class="card-btn btn-cyan">VIEW PROJECT &rarr;</a>
+                        <a href="#" class="card-btn btn-cyan glow-hover">VIEW PROJECT &rarr;</a>
                     </div>
                 </div>
             </div>
@@ -225,15 +261,16 @@
     <!-- CTA Section -->
     <section class="cta">
         <div class="container">
-            <h2 class="cta-title">READY TO BUILD?</h2>
-            <a href="#contact" class="cta-btn">GET IN TOUCH</a>
+            <h2 class="cta-title glitch-text" data-text="READY TO BUILD?">READY TO BUILD?</h2>
+            <a href="#contact" class="cta-btn glow-hover pulse-glow">GET IN TOUCH</a>
         </div>
     </section>
 
     <!-- About Section -->
     <section class="about" id="about">
+        <canvas id="codeRain2" class="code-rain-bg"></canvas>
         <div class="container">
-            <div class="section-header">
+            <div class="section-header reveal">
                 <div class="section-tag">// ABOUT ME</div>
                 <h2 class="section-title">GBC32</h2>
             </div>
@@ -262,22 +299,22 @@
                     </div>
                 </div>
                 <div class="about-stats-col reveal">
-                    <div class="stat-card">
+                    <div class="stat-card glow-hover">
                         <span class="stat-icon">&#9889;</span>
                         <span class="stat-value">5+</span>
                         <span class="stat-name">Years Luau</span>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card glow-hover">
                         <span class="stat-icon">&#9998;</span>
                         <span class="stat-value">1,360</span>
                         <span class="stat-name">Lines / Script</span>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card glow-hover">
                         <span class="stat-icon">&#9881;</span>
                         <span class="stat-value">17</span>
                         <span class="stat-name">Simultaneous VFX</span>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card glow-hover">
                         <span class="stat-icon">&#9654;</span>
                         <span class="stat-value">60fps</span>
                         <span class="stat-name">On Mobile</span>
@@ -295,21 +332,21 @@
                 <h2 class="contact-title">LET'S WORK<br>TOGETHER</h2>
                 <p class="contact-desc">Got a project? DM me on Discord. I work fast, ship clean, and deliver on deadline.</p>
                 <div class="contact-cards">
-                    <a href="#" class="contact-card">
+                    <a href="#" class="contact-card glow-hover">
                         <span class="contact-card-icon">&#128172;</span>
                         <div>
                             <span class="contact-card-label">Discord</span>
                             <span class="contact-card-value">Uben221111</span>
                         </div>
                     </a>
-                    <a href="https://www.roblox.com/users/" class="contact-card" target="_blank">
+                    <a href="https://www.roblox.com/users/" class="contact-card glow-hover" target="_blank">
                         <span class="contact-card-icon">&#127918;</span>
                         <div>
                             <span class="contact-card-label">Roblox</span>
                             <span class="contact-card-value">Uben221111</span>
                         </div>
                     </a>
-                    <a href="https://github.com/Chumbus3858" class="contact-card" target="_blank">
+                    <a href="https://github.com/Chumbus3858" class="contact-card glow-hover" target="_blank">
                         <span class="contact-card-icon">&#128187;</span>
                         <div>
                             <span class="contact-card-label">GitHub</span>
@@ -330,10 +367,10 @@
             </div>
             <div class="footer-nav">
                 <h4 class="footer-heading">NAVIGATION</h4>
-                <a href="#home">Home</a>
-                <a href="#portfolio">Portfolio</a>
-                <a href="#about">About</a>
-                <a href="#contact">Contact</a>
+                <a href="#home" class="glow-hover">Home</a>
+                <a href="#portfolio" class="glow-hover">Portfolio</a>
+                <a href="#about" class="glow-hover">About</a>
+                <a href="#contact" class="glow-hover">Contact</a>
             </div>
             <div class="footer-connect">
                 <h4 class="footer-heading">CONNECT</h4>
