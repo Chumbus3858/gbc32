@@ -909,53 +909,161 @@ a { color: inherit; text-decoration: none; }
     image-rendering: pixelated;
 }
 
-/* CTA crack split */
+/* CTA reality tear — dramatic jagged rip */
 .cta-crack {
     position: absolute;
     top: 0;
     left: 50%;
-    width: 4px;
+    width: 240px;
     height: 100%;
-    transform: translateX(-50%) scaleY(0);
-    transform-origin: top center;
+    transform: translateX(-50%);
     z-index: 3;
     pointer-events: none;
-    background: linear-gradient(180deg,
-        transparent 0%,
-        rgba(0, 255, 204, 0.8) 20%,
-        rgba(255, 255, 255, 0.9) 50%,
-        rgba(0, 255, 204, 0.8) 80%,
-        transparent 100%
-    );
-    box-shadow: 0 0 20px var(--cyan-glow), 0 0 40px var(--cyan-glow);
-    transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    clip-path: inset(0 0 100% 0);
+    transition: clip-path 1.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .cta-crack.cracking {
-    transform: translateX(-50%) scaleY(1);
+    clip-path: inset(0 0 0% 0);
 }
-.cta-crack::before,
-.cta-crack::after {
+
+/* Wide outer purple/blue glow aura */
+.rip-glow {
+    position: absolute;
+    top: -10%;
+    bottom: -10%;
+    left: 50%;
+    width: 180px;
+    transform: translateX(-50%);
+    background: linear-gradient(180deg,
+        transparent 0%,
+        rgba(80, 40, 200, 0.4) 12%,
+        rgba(120, 70, 255, 0.65) 30%,
+        rgba(80, 120, 255, 0.8) 50%,
+        rgba(120, 70, 255, 0.65) 70%,
+        rgba(80, 40, 200, 0.4) 88%,
+        transparent 100%
+    );
+    filter: blur(35px);
+    animation: ripPulse 3s ease-in-out infinite;
+}
+
+/* Inner bright glow layer */
+.rip-glow::before {
     content: '';
     position: absolute;
+    top: 5%;
+    bottom: 5%;
+    left: 50%;
+    width: 90px;
+    transform: translateX(-50%);
+    background: linear-gradient(180deg,
+        transparent 0%,
+        rgba(160, 120, 255, 0.7) 18%,
+        rgba(200, 175, 255, 0.95) 42%,
+        rgba(255, 255, 255, 0.85) 50%,
+        rgba(200, 175, 255, 0.95) 58%,
+        rgba(160, 120, 255, 0.7) 82%,
+        transparent 100%
+    );
+    filter: blur(14px);
+}
+
+/* Far outer haze */
+.rip-glow::after {
+    content: '';
+    position: absolute;
+    top: -15%;
+    bottom: -15%;
+    left: 50%;
+    width: 350px;
+    transform: translateX(-50%);
+    background: radial-gradient(ellipse at center,
+        rgba(90, 50, 230, 0.2) 0%,
+        rgba(50, 90, 210, 0.1) 35%,
+        transparent 65%
+    );
+    filter: blur(50px);
+}
+
+/* Core jagged crack shape — the actual tear */
+.rip-core {
+    position: absolute;
+    top: -2%;
+    bottom: -2%;
+    left: 50%;
     width: 80px;
-    height: 2px;
-    top: 50%;
-    opacity: 0;
-    transition: opacity 0.5s 0.8s;
+    transform: translateX(-50%);
+    background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(60, 30, 160, 0.08) 8%,
+        rgba(120, 60, 220, 0.3) 18%,
+        rgba(160, 120, 255, 0.7) 30%,
+        rgba(220, 200, 255, 0.95) 40%,
+        rgba(255, 255, 255, 1) 48%,
+        rgba(255, 255, 255, 1) 52%,
+        rgba(220, 200, 255, 0.95) 60%,
+        rgba(160, 120, 255, 0.7) 70%,
+        rgba(120, 60, 220, 0.3) 82%,
+        rgba(60, 30, 160, 0.08) 92%,
+        transparent 100%
+    );
+    clip-path: polygon(
+        48% 0%, 52% 0%,
+        57% 3%, 63% 7%, 56% 10%, 65% 14%, 59% 17%,
+        67% 21%, 61% 24%, 70% 28%, 63% 31%, 72% 35%,
+        65% 38%, 73% 42%, 66% 45%, 71% 49%, 64% 52%,
+        69% 55%, 61% 58%, 67% 62%, 59% 65%, 66% 68%,
+        58% 71%, 64% 75%, 57% 78%, 63% 82%,
+        56% 85%, 61% 89%, 57% 92%, 59% 96%,
+        52% 100%, 48% 100%,
+        41% 96%, 43% 92%, 39% 89%, 44% 85%,
+        37% 82%, 43% 78%, 36% 75%, 42% 71%,
+        34% 68%, 41% 65%, 33% 62%, 39% 58%,
+        31% 55%, 36% 52%, 29% 49%, 34% 45%,
+        27% 42%, 35% 38%, 28% 35%, 37% 31%,
+        30% 28%, 39% 24%, 33% 21%,
+        41% 17%, 35% 14%, 44% 10%, 37% 7%, 43% 3%
+    );
 }
-.cta-crack::before {
-    left: 100%;
-    background: linear-gradient(90deg, rgba(0,255,204,0.6), transparent);
-    transform: rotate(15deg);
+
+/* Horizontal light rays from crack */
+.rip-core::before {
+    content: '';
+    position: absolute;
+    top: 15%;
+    bottom: 15%;
+    left: 50%;
+    width: 500px;
+    transform: translateX(-50%);
+    background: linear-gradient(90deg,
+        transparent 0%,
+        rgba(140, 80, 240, 0.02) 25%,
+        rgba(168, 120, 255, 0.06) 40%,
+        rgba(255, 255, 255, 0.1) 49%,
+        rgba(255, 255, 255, 0.1) 51%,
+        rgba(168, 120, 255, 0.06) 60%,
+        rgba(140, 80, 240, 0.02) 75%,
+        transparent 100%
+    );
+    filter: blur(3px);
 }
-.cta-crack::after {
-    right: 100%;
-    background: linear-gradient(-90deg, rgba(0,255,204,0.6), transparent);
-    transform: rotate(-15deg);
-}
-.cta-crack.cracking::before,
-.cta-crack.cracking::after {
-    opacity: 1;
+
+/* Branch fracture lines radiating outward */
+.rip-core::after {
+    content: '';
+    position: absolute;
+    top: 25%;
+    left: 50%;
+    width: 200px;
+    height: 200px;
+    transform: translate(-50%, -20%);
+    background:
+        linear-gradient(22deg, transparent 47%, rgba(168,85,247,0.35) 47.5%, rgba(168,85,247,0.35) 48%, transparent 48.5%),
+        linear-gradient(-30deg, transparent 46%, rgba(100,130,255,0.25) 46.5%, rgba(100,130,255,0.25) 47%, transparent 47.5%),
+        linear-gradient(65deg, transparent 48%, rgba(168,85,247,0.2) 48.5%, rgba(168,85,247,0.2) 49%, transparent 49.5%),
+        linear-gradient(-55deg, transparent 47%, rgba(100,130,255,0.15) 47.5%, rgba(100,130,255,0.15) 48%, transparent 48.5%),
+        linear-gradient(110deg, transparent 49%, rgba(140,70,230,0.12) 49.3%, rgba(140,70,230,0.12) 49.6%, transparent 50%);
+    filter: blur(0.5px);
 }
 
 /* CTA green arrows */
@@ -1318,6 +1426,12 @@ a { color: inherit; text-decoration: none; }
 @keyframes arrowBounce {
     0%, 100% { transform: translateY(0) scale(1); }
     50% { transform: translateY(-8px) scale(1.1); }
+}
+
+/* Reality rip glow pulse */
+@keyframes ripPulse {
+    0%, 100% { opacity: 0.7; filter: blur(35px); }
+    50% { opacity: 1; filter: blur(28px); }
 }
 
 /* ============ SCROLL REVEAL ============ */
