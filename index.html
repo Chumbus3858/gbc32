@@ -3,23 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Uben221111 — Roblox Developer</title>
+    <title>ROBLOX | GBC32</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Bebas+Neue&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Bebas+Neue&family=Oswald:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Cursor glow -->
-    <div class="cursor-glow" id="cursorGlow"></div>
+
+    <!-- Loading Screen -->
+    <div class="loader" id="loader">
+        <div class="loader-content">
+            <div class="loader-percent" id="loaderPercent">0%</div>
+            <div class="loader-bar">
+                <div class="loader-fill" id="loaderFill"></div>
+            </div>
+            <div class="loader-text">Loading portfolio...</div>
+        </div>
+    </div>
 
     <!-- Navigation -->
-    <nav class="nav">
-        <a href="#home" class="nav-logo">UBEN221111</a>
+    <nav class="nav" id="nav">
+        <a href="#" class="nav-logo">GBC32</a>
         <div class="nav-links">
             <a href="#home">Home</a>
+            <a href="#about">About</a>
             <a href="#portfolio">Portfolio</a>
-            <a href="#services">Services</a>
             <a href="#contact">Contact</a>
         </div>
     </nav>
@@ -27,21 +36,14 @@
     <!-- Hero Section -->
     <section class="hero" id="home">
         <div class="hero-content">
-            <div class="hero-tag">ROBLOX DEVELOPER</div>
-            <h1 class="hero-title">
-                <span class="hero-line">I BUILD</span>
-                <span class="hero-line accent">CINEMATIC</span>
-                <span class="hero-line">EXPERIENCES</span>
-            </h1>
-            <p class="hero-sub">Full-stack Roblox systems — combat, UI, VFX, data architecture. Work ships fast and ships clean.</p>
-            <div class="hero-cta">
-                <a href="#contact" class="btn-primary">Get in Touch</a>
-                <a href="#portfolio" class="btn-secondary">View Work</a>
+            <h1 class="hero-title">ROBLOX</h1>
+            <div class="hero-subtitle">
+                <span class="hero-line-deco"></span>
+                <span class="hero-diamond">&#9670;</span>
+                <span class="hero-tagline">COMBAT SYSTEMS & CINEMATIC UI</span>
+                <span class="hero-diamond">&#9670;</span>
+                <span class="hero-line-deco"></span>
             </div>
-        </div>
-        <div class="hero-scroll-hint">
-            <span>SCROLL</span>
-            <div class="scroll-line"></div>
         </div>
     </section>
 
@@ -49,232 +51,167 @@
     <div class="banner">
         <div class="banner-track">
             <span>ROBLOX DEVELOPMENT</span>
-            <span class="banner-dot"></span>
+            <span class="banner-dot">&bull;</span>
             <span>COMBAT SYSTEMS</span>
-            <span class="banner-dot"></span>
-            <span>CINEMATIC UI</span>
-            <span class="banner-dot"></span>
-            <span>VFX SCRIPTING</span>
-            <span class="banner-dot"></span>
-            <span>DATA ARCHITECTURE</span>
-            <span class="banner-dot"></span>
+            <span class="banner-dot">&bull;</span>
+            <span>SCRIPTING</span>
+            <span class="banner-dot">&bull;</span>
+            <span>UI/UX</span>
+            <span class="banner-dot">&bull;</span>
+            <span>VFX</span>
+            <span class="banner-dot">&bull;</span>
             <span>GAME DESIGN</span>
-            <span class="banner-dot"></span>
+            <span class="banner-dot">&bull;</span>
             <span>ROBLOX DEVELOPMENT</span>
-            <span class="banner-dot"></span>
+            <span class="banner-dot">&bull;</span>
             <span>COMBAT SYSTEMS</span>
-            <span class="banner-dot"></span>
-            <span>CINEMATIC UI</span>
-            <span class="banner-dot"></span>
-            <span>VFX SCRIPTING</span>
-            <span class="banner-dot"></span>
-            <span>DATA ARCHITECTURE</span>
-            <span class="banner-dot"></span>
+            <span class="banner-dot">&bull;</span>
+            <span>SCRIPTING</span>
+            <span class="banner-dot">&bull;</span>
+            <span>UI/UX</span>
+            <span class="banner-dot">&bull;</span>
+            <span>VFX</span>
+            <span class="banner-dot">&bull;</span>
             <span>GAME DESIGN</span>
-            <span class="banner-dot"></span>
+            <span class="banner-dot">&bull;</span>
         </div>
     </div>
 
     <!-- Portfolio Section -->
     <section class="portfolio" id="portfolio">
-        <div class="section-header">
-            <span class="section-tag">SELECTED WORK</span>
-            <h2 class="section-title">Portfolio</h2>
-        </div>
+        <div class="container">
 
-        <div class="projects-grid">
             <!-- Project 1 -->
-            <div class="project-card" data-project="1">
-                <div class="project-media">
-                    <div class="project-placeholder">
-                        <span class="placeholder-icon">&#9654;</span>
-                        <span>MARVEL HEROES 2026</span>
-                    </div>
-                    <div class="project-overlay">
-                        <span class="project-number">01</span>
+            <div class="project-card reveal">
+                <div class="project-image">
+                    <div class="project-thumb">
+                        <span class="thumb-num">01</span>
                     </div>
                 </div>
                 <div class="project-info">
-                    <h3>Cinematic Start Screen</h3>
-                    <p>1,360 lines of hand-written Luau. 17 simultaneous post-processing effects running at 60fps. Ken Burns parallax, chromatic aberration, floating particles, shimmer sweeps, bloom.</p>
-                    <div class="project-tags">
-                        <span>UI/UX</span>
-                        <span>VFX</span>
-                        <span>Post-Processing</span>
-                    </div>
+                    <div class="project-tag">UI DESIGN</div>
+                    <h3 class="project-name">CINEMATIC START SCREEN</h3>
+                    <p class="project-desc">1,360 lines of hand-written Luau powering 17 simultaneous post-processing effects at 60fps. Ken Burns parallax, chromatic aberration, floating particles, shimmer sweeps, and bloom — built for Marvel Heroes 2026.</p>
+                    <a href="#" class="project-link">VIEW PROJECT &rarr;</a>
                 </div>
             </div>
 
             <!-- Project 2 -->
-            <div class="project-card" data-project="2">
-                <div class="project-media">
-                    <div class="project-placeholder">
-                        <span class="placeholder-icon">&#9654;</span>
-                        <span>OUTRIDER</span>
-                    </div>
-                    <div class="project-overlay">
-                        <span class="project-number">02</span>
+            <div class="project-card reverse reveal">
+                <div class="project-image">
+                    <div class="project-thumb">
+                        <span class="thumb-num">02</span>
                     </div>
                 </div>
                 <div class="project-info">
-                    <h3>Top-Down Wave Shooter</h3>
-                    <p>Full game systems — wave management, enemy AI, weapon handling, player progression. Server-authoritative combat with anti-exploit validation.</p>
-                    <div class="project-tags">
-                        <span>Combat</span>
-                        <span>AI</span>
-                        <span>Networking</span>
-                    </div>
+                    <div class="project-tag">GAME SYSTEMS</div>
+                    <h3 class="project-name">OUTRIDER — WAVE SHOOTER</h3>
+                    <p class="project-desc">Top-down wave shooter with full game systems — wave management, enemy AI, weapon handling, player progression. Server-authoritative combat with anti-exploit validation.</p>
+                    <a href="#" class="project-link">VIEW PROJECT &rarr;</a>
                 </div>
             </div>
 
             <!-- Project 3 -->
-            <div class="project-card" data-project="3">
-                <div class="project-media">
-                    <div class="project-placeholder">
-                        <span class="placeholder-icon">&#9654;</span>
-                        <span>COMBAT FRAMEWORK</span>
-                    </div>
-                    <div class="project-overlay">
-                        <span class="project-number">03</span>
+            <div class="project-card reveal">
+                <div class="project-image">
+                    <div class="project-thumb">
+                        <span class="thumb-num">03</span>
                     </div>
                 </div>
                 <div class="project-info">
-                    <h3>Server-Auth Combat System</h3>
-                    <p>Full server-authoritative combat framework — combos, blocking, dodging, hit validation, anti-exploit. Built for fighting games with frame-perfect precision.</p>
-                    <div class="project-tags">
-                        <span>Combat</span>
-                        <span>Server-Auth</span>
-                        <span>Anti-Cheat</span>
-                    </div>
+                    <div class="project-tag">COMBAT</div>
+                    <h3 class="project-name">SERVER-AUTH COMBAT FRAMEWORK</h3>
+                    <p class="project-desc">Full server-authoritative fighting system — combo chains, blocking, dodging, spatial hit validation, and anti-exploit. Frame-perfect precision built for competitive fighting games.</p>
+                    <a href="#" class="project-link">VIEW PROJECT &rarr;</a>
                 </div>
             </div>
 
             <!-- Project 4 -->
-            <div class="project-card" data-project="4">
-                <div class="project-media">
-                    <div class="project-placeholder">
-                        <span class="placeholder-icon">&#9654;</span>
-                        <span>WAVE MANAGER</span>
-                    </div>
-                    <div class="project-overlay">
-                        <span class="project-number">04</span>
+            <div class="project-card reverse reveal">
+                <div class="project-image">
+                    <div class="project-thumb">
+                        <span class="thumb-num">04</span>
                     </div>
                 </div>
                 <div class="project-info">
-                    <h3>Wave Spawning System</h3>
-                    <p>Modular wave management — weighted enemy selection, difficulty scaling, boss encounters, distance-based rewards, leaderboard tracking. 370+ lines of production Luau.</p>
-                    <div class="project-tags">
-                        <span>Systems</span>
-                        <span>OOP</span>
-                        <span>Modular</span>
+                    <div class="project-tag">SCRIPTING</div>
+                    <h3 class="project-name">WAVE SPAWNING SYSTEM</h3>
+                    <p class="project-desc">Modular wave management — weighted enemy selection, difficulty scaling, boss encounters, distance-based rewards, and leaderboard tracking. 370+ lines of production Luau.</p>
+                    <a href="#" class="project-link">VIEW PROJECT &rarr;</a>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about" id="about">
+        <div class="container">
+            <div class="about-header reveal">
+                <div class="project-tag">ABOUT ME</div>
+                <h2 class="about-title">GBC32</h2>
+            </div>
+            <div class="about-content reveal">
+                <p class="about-text">Full-stack Roblox developer specializing in cinematic combat systems, premium UI, and VFX scripting. 5+ years of Luau experience building production-ready game systems that ship fast and ship clean.</p>
+                <div class="about-stats">
+                    <div class="about-stat">
+                        <span class="stat-num">5+</span>
+                        <span class="stat-label">Years Luau</span>
+                    </div>
+                    <div class="stat-sep"></div>
+                    <div class="about-stat">
+                        <span class="stat-num">1,360</span>
+                        <span class="stat-label">Lines in One Script</span>
+                    </div>
+                    <div class="stat-sep"></div>
+                    <div class="about-stat">
+                        <span class="stat-num">17</span>
+                        <span class="stat-label">Simultaneous VFX</span>
+                    </div>
+                    <div class="stat-sep"></div>
+                    <div class="about-stat">
+                        <span class="stat-num">60</span>
+                        <span class="stat-label">FPS on Mobile</span>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Services Section -->
-    <section class="services" id="services">
-        <div class="section-header">
-            <span class="section-tag">WHAT I DO</span>
-            <h2 class="section-title">Services</h2>
-        </div>
-
-        <div class="services-grid">
-            <div class="service-card">
-                <div class="service-number">01</div>
-                <h3>Combat Systems</h3>
-                <p>Server-authoritative combat with hit validation, combo chains, blocking, dodging, and anti-exploit. Frame-perfect precision for fighting games.</p>
-            </div>
-            <div class="service-card">
-                <div class="service-number">02</div>
-                <h3>Cinematic UI</h3>
-                <p>Premium menu systems with post-processing effects, spring animations, parallax backgrounds, and Tekken-inspired design language.</p>
-            </div>
-            <div class="service-card">
-                <div class="service-number">03</div>
-                <h3>VFX Scripting</h3>
-                <p>Particles, beams, trails, combat effects, screen shake, slow motion, afterimages. Performance-optimized with object pooling.</p>
-            </div>
-            <div class="service-card">
-                <div class="service-number">04</div>
-                <h3>Data Architecture</h3>
-                <p>ProfileStore with session locking, auto-save, migration systems. Bulletproof player data that never dupes or corrupts.</p>
-            </div>
-            <div class="service-card">
-                <div class="service-number">05</div>
-                <h3>Game Systems</h3>
-                <p>Wave management, matchmaking, inventory, progression, economy. Full production-ready systems with clean modular code.</p>
-            </div>
-            <div class="service-card">
-                <div class="service-number">06</div>
-                <h3>3D & Animation</h3>
-                <p>Blender modeling, character rigging, combat animations. AI-assisted pipeline with Rodin and ComfyUI for rapid asset production.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Stats Banner -->
-    <div class="stats-banner">
-        <div class="stat">
-            <span class="stat-number">5+</span>
-            <span class="stat-label">YEARS LUAU</span>
-        </div>
-        <div class="stat-divider"></div>
-        <div class="stat">
-            <span class="stat-number">1,360</span>
-            <span class="stat-label">LINES IN ONE SCRIPT</span>
-        </div>
-        <div class="stat-divider"></div>
-        <div class="stat">
-            <span class="stat-number">17</span>
-            <span class="stat-label">SIMULTANEOUS VFX</span>
-        </div>
-        <div class="stat-divider"></div>
-        <div class="stat">
-            <span class="stat-number">60</span>
-            <span class="stat-label">FPS ON MOBILE</span>
-        </div>
-    </div>
-
     <!-- Contact Section -->
     <section class="contact" id="contact">
-        <div class="section-header">
-            <span class="section-tag">LET'S WORK</span>
-            <h2 class="section-title">Contact</h2>
-        </div>
-
-        <div class="contact-content">
-            <div class="contact-text">
-                <p>Got a project? DM me on Discord. I work fast, ship clean, and deliver on deadline.</p>
+        <div class="container">
+            <div class="contact-inner reveal">
+                <div class="project-tag">GET IN TOUCH</div>
+                <h2 class="contact-title">LET'S WORK<br>TOGETHER</h2>
+                <p class="contact-desc">Got a project? DM me on Discord. I work fast, ship clean, and deliver on deadline.</p>
                 <div class="contact-links">
-                    <a href="#" class="contact-link discord">
-                        <span class="contact-icon">&#xe800;</span>
-                        <div>
-                            <span class="contact-label">Discord</span>
-                            <span class="contact-value">Uben221111</span>
-                        </div>
+                    <a href="#" class="contact-card">
+                        <span class="contact-card-label">Discord</span>
+                        <span class="contact-card-value">Uben221111</span>
                     </a>
-                    <a href="https://www.roblox.com/users/" class="contact-link roblox" target="_blank">
-                        <div>
-                            <span class="contact-label">Roblox</span>
-                            <span class="contact-value">Uben221111</span>
-                        </div>
+                    <a href="https://www.roblox.com/users/" class="contact-card" target="_blank">
+                        <span class="contact-card-label">Roblox</span>
+                        <span class="contact-card-value">Uben221111</span>
+                    </a>
+                    <a href="https://github.com/Chumbus3858" class="contact-card" target="_blank">
+                        <span class="contact-card-label">GitHub</span>
+                        <span class="contact-card-value">Chumbus3858</span>
                     </a>
                 </div>
-            </div>
-            <div class="contact-availability">
-                <div class="availability-dot"></div>
-                <span>Available for commissions</span>
+                <div class="contact-avail">
+                    <span class="avail-dot"></span>
+                    Available for commissions
+                </div>
             </div>
         </div>
     </section>
 
     <!-- Footer -->
     <footer class="footer">
-        <div class="footer-content">
-            <span class="footer-logo">UBEN221111</span>
-            <span class="footer-copy">&copy; 2026 All rights reserved</span>
+        <div class="footer-inner">
+            <span class="footer-logo">GBC32</span>
+            <span class="footer-copy">&copy; 2026 GBC32. All rights reserved.</span>
         </div>
     </footer>
 
