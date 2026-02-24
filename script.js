@@ -61,49 +61,44 @@ function createStaticCanvas(canvasId) {
 createStaticCanvas('loaderStatic');
 createStaticCanvas('heroStatic');
 
-// ============ BINARY REVEAL — WHITE BG, MOUSE FLASHLIGHT ============
+// ============ BINARY REVEAL — FALLING + MORPHING + MOUSE FLASHLIGHT + VIGNETTES ============
 function createBinaryReveal(canvasId) {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     const section = canvas.closest('section') || canvas.parentElement;
 
+    const GAP_X = 32;
+    const GAP_Y = 26;
+    const FONT_SIZE = 13;
+    const REVEAL_R = 280;
+    const FALL_SPEED = 0.4; // pixels per frame
+    const MORPH_CHANCE = 0.02; // chance per cell per frame to change symbol
+    const SYMBOLS = '01{}()<>+-=.:;|/\\01010101アイウエオカキクケコ';
+    let cols = 0, rows = 0, cells = [];
+
+    function buildGrid() {
+        cols = Math.floor(canvas.width / GAP_X) + 1;
+        rows = Math.floor(canvas.height / GAP_Y) + 3; // extra rows for scroll buffer
+        cells = [];
+        for (let c = 0; c < cols; c++) {
+            const col = [];
+            for (let r = 0; r < rows; r++) {
+                col.push({
+                    ch: SYMBOLS[Math.random() * SYMBOLS.length | 0],
+                    speed: FALL_SPEED + Math.random() * 0.3,
+                    yOff: 0, // sub-pixel offset for smooth fall
+                });
+            }
+            cells.push(col);
+        }
+    }
+
     function resize() {
         canvas.width = canvas.offsetWidth;
         canvas.height = canvas.offsetHeight;
         buildGrid();
     }
-
-    const GAP_X = 32;   // horizontal spacing
-    const GAP_Y = 28;   // vertical spacing
-    const FONT_SIZE = 13;
-    const REVEAL_R = 280; // reveal radius from mouse
-    const COLOR = '#1a2744'; // dark navy like reference
-    let grid = [];
-
-    function buildGrid() {
-        grid = [];
-        const cols = Math.floor(canvas.width / GAP_X);
-        const rows = Math.floor(canvas.height / GAP_Y);
-        for (let r = 0; r < rows; r++) {
-            for (let c = 0; c < cols; c++) {
-                const rng = Math.random();
-                let ch;
-                // Mix: 60% binary, 25% dots, 15% small symbols
-                if (rng < 0.35) ch = '0';
-                else if (rng < 0.60) ch = '1';
-                else if (rng < 0.85) ch = '\u00B7'; // middle dot
-                else ch = ['0','1','0','1','0','1','\u2022','\u00B7'][Math.random() * 8 | 0];
-                grid.push({
-                    x: c * GAP_X + GAP_X / 2 + (Math.random() - 0.5) * 4,
-                    y: r * GAP_Y + GAP_Y / 2 + (Math.random() - 0.5) * 4,
-                    ch: ch,
-                    size: ch === '\u00B7' || ch === '\u2022' ? FONT_SIZE - 4 : FONT_SIZE,
-                });
-            }
-        }
-    }
-
     resize();
     window.addEventListener('resize', resize);
 
@@ -116,41 +111,100 @@ function createBinaryReveal(canvasId) {
     });
     section.addEventListener('mouseleave', () => { mx = -9999; my = -9999; });
 
+    // Pre-build edge vignette gradient (dark shading around edges)
+    function drawEdgeVignette() {
+        const w = canvas.width, h = canvas.height;
+        const grad = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.25, w / 2, h / 2, Math.max(w, h) * 0.75);
+        grad.addColorStop(0, 'rgba(255,255,255,0)');
+        grad.addColorStop(0.5, 'rgba(200,200,200,0.15)');
+        grad.addColorStop(0.8, 'rgba(100,100,100,0.4)');
+        grad.addColorStop(1, 'rgba(30,30,30,0.7)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, w, h);
+    }
+
+    // Green glow vignette around mouse reveal
+    function drawMouseVignette() {
+        if (mx < -999) return;
+        const grad = ctx.createRadialGradient(mx, my, 0, mx, my, REVEAL_R);
+        grad.addColorStop(0, 'rgba(0, 255, 100, 0.0)');
+        grad.addColorStop(0.5, 'rgba(0, 255, 80, 0.0)');
+        grad.addColorStop(0.75, 'rgba(0, 255, 80, 0.06)');
+        grad.addColorStop(0.92, 'rgba(0, 200, 60, 0.18)');
+        grad.addColorStop(1, 'rgba(0, 160, 50, 0.35)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(mx, my, REVEAL_R, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
     let last = 0;
     function draw(t) {
         requestAnimationFrame(draw);
-        if (t - last < 32) return; // ~30fps is plenty for static grid
+        if (t - last < 40) return; // ~25fps
         last = t;
+
+        const W = canvas.width, H = canvas.height;
 
         // Clear to white
         ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillRect(0, 0, W, H);
+
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.shadowBlur = 0;
+        ctx.font = FONT_SIZE + 'px monospace';
 
         const R = REVEAL_R;
-        const R2 = R * R; // avoid sqrt per cell
+        const R2 = R * R;
 
-        for (let i = 0; i < grid.length; i++) {
-            const g = grid[i];
-            const dx = g.x - mx;
-            const dy = g.y - my;
-            const d2 = dx * dx + dy * dy;
-            if (d2 > R2) continue; // outside reveal — skip (stays white)
+        // Update + draw cells
+        for (let c = 0; c < cols; c++) {
+            const col = cells[c];
+            const baseX = c * GAP_X + GAP_X / 2;
 
-            const dist = Math.sqrt(d2);
-            const prox = 1 - dist / R; // 1 at center, 0 at edge
-            // Smooth falloff — cubic ease for natural spotlight feel
-            const alpha = prox * prox * prox * 0.85;
+            for (let r = 0; r < rows; r++) {
+                const cell = col[r];
 
-            ctx.font = g.size + 'px monospace';
-            ctx.fillStyle = COLOR;
-            ctx.globalAlpha = alpha;
-            ctx.fillText(g.ch, g.x, g.y);
+                // Fall: shift offset down
+                cell.yOff += cell.speed;
+
+                // Morph: randomly change symbol
+                if (Math.random() < MORPH_CHANCE) {
+                    cell.ch = SYMBOLS[Math.random() * SYMBOLS.length | 0];
+                }
+
+                // Wrap: when a cell falls past one row height, shift back and re-randomize
+                if (cell.yOff >= GAP_Y) {
+                    cell.yOff -= GAP_Y;
+                    cell.ch = SYMBOLS[Math.random() * SYMBOLS.length | 0];
+                }
+
+                const drawY = r * GAP_Y + GAP_Y / 2 + cell.yOff;
+                if (drawY < -GAP_Y || drawY > H + GAP_Y) continue;
+
+                // Distance to mouse
+                const dx = baseX - mx;
+                const dy = drawY - my;
+                const d2 = dx * dx + dy * dy;
+                if (d2 > R2) continue; // outside reveal — stays hidden
+
+                const dist = Math.sqrt(d2);
+                const prox = 1 - dist / R;
+                const alpha = prox * prox * 0.9; // quadratic falloff
+
+                ctx.fillStyle = '#1a2744';
+                ctx.globalAlpha = alpha;
+                ctx.fillText(cell.ch, baseX, drawY);
+            }
         }
 
         ctx.globalAlpha = 1;
+
+        // Green vignette ring around mouse spotlight
+        drawMouseVignette();
+
+        // Dark edge vignette — shady edges
+        drawEdgeVignette();
     }
     requestAnimationFrame(draw);
 }
