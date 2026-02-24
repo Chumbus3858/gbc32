@@ -61,110 +61,103 @@ function createStaticCanvas(canvasId) {
 createStaticCanvas('loaderStatic');
 createStaticCanvas('heroStatic');
 
-// ============ CODE RAIN — DARK DEFAULT, VIBRANT ON HOVER ============
-function createCodeRain(canvasId) {
+// ============ BINARY REVEAL — WHITE BG, MOUSE FLASHLIGHT ============
+function createBinaryReveal(canvasId) {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     const section = canvas.closest('section') || canvas.parentElement;
 
-    // Half-res for performance + cleaner look
     function resize() {
-        canvas.width = Math.ceil(canvas.offsetWidth / 2);
-        canvas.height = Math.ceil(canvas.offsetHeight / 2);
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+        buildGrid();
     }
+
+    const GAP_X = 32;   // horizontal spacing
+    const GAP_Y = 28;   // vertical spacing
+    const FONT_SIZE = 13;
+    const REVEAL_R = 280; // reveal radius from mouse
+    const COLOR = '#1a2744'; // dark navy like reference
+    let grid = [];
+
+    function buildGrid() {
+        grid = [];
+        const cols = Math.floor(canvas.width / GAP_X);
+        const rows = Math.floor(canvas.height / GAP_Y);
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                const rng = Math.random();
+                let ch;
+                // Mix: 60% binary, 25% dots, 15% small symbols
+                if (rng < 0.35) ch = '0';
+                else if (rng < 0.60) ch = '1';
+                else if (rng < 0.85) ch = '\u00B7'; // middle dot
+                else ch = ['0','1','0','1','0','1','\u2022','\u00B7'][Math.random() * 8 | 0];
+                grid.push({
+                    x: c * GAP_X + GAP_X / 2 + (Math.random() - 0.5) * 4,
+                    y: r * GAP_Y + GAP_Y / 2 + (Math.random() - 0.5) * 4,
+                    ch: ch,
+                    size: ch === '\u00B7' || ch === '\u2022' ? FONT_SIZE - 4 : FONT_SIZE,
+                });
+            }
+        }
+    }
+
     resize();
     window.addEventListener('resize', resize);
 
-    const chars = '01{}()<>+-=アイウエオlocal return end';
-    const vibrantColors = ['#00ffcc','#39ff14','#ff4d00','#a855f7','#eab308','#ff6b6b','#4ecdc4','#ff0055','#3b82f6','#00ff88'];
-    const dimColor = '#0d2a0d';
-    const fontSize = 12;
-    let columns, drops, colColors, speeds;
-
-    function initColumns() {
-        columns = Math.floor(canvas.width / fontSize);
-        if (columns < 1) columns = 1;
-        drops = Array(columns).fill(0).map(() => (Math.random() * canvas.height / fontSize) | 0);
-        colColors = Array(columns).fill(0).map(() => vibrantColors[(Math.random() * vibrantColors.length) | 0]);
-        speeds = Array(columns).fill(0).map(() => 0.4 + Math.random() * 0.8);
-    }
-    initColumns();
-    window.addEventListener('resize', () => { resize(); initColumns(); });
-
-    // Track mouse in canvas-local coords (half-res)
-    let mx = -9999, my = -9999, hovering = false;
+    // Mouse tracking
+    let mx = -9999, my = -9999;
     section.addEventListener('mousemove', (e) => {
         const r = canvas.getBoundingClientRect();
-        // Scale mouse to canvas coords (canvas is half the CSS size)
-        mx = (e.clientX - r.left) * (canvas.width / r.width);
-        my = (e.clientY - r.top) * (canvas.height / r.height);
-        hovering = true;
+        mx = e.clientX - r.left;
+        my = e.clientY - r.top;
     });
-    section.addEventListener('mouseleave', () => { hovering = false; mx = -9999; my = -9999; });
+    section.addEventListener('mouseleave', () => { mx = -9999; my = -9999; });
 
     let last = 0;
     function draw(t) {
         requestAnimationFrame(draw);
-        if (t - last < 50) return;
+        if (t - last < 32) return; // ~30fps is plenty for static grid
         last = t;
 
-        // Fade previous frame
-        ctx.fillStyle = 'rgba(6, 6, 8, 0.15)';
+        // Clear to white
+        ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.font = fontSize + 'px monospace';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
         ctx.shadowBlur = 0;
 
-        const R = 180; // hover radius in canvas pixels
+        const R = REVEAL_R;
+        const R2 = R * R; // avoid sqrt per cell
 
-        for (let i = 0; i < columns; i++) {
-            const x = i * fontSize;
-            const y = drops[i] * fontSize;
-            const ch = chars[(Math.random() * chars.length) | 0];
+        for (let i = 0; i < grid.length; i++) {
+            const g = grid[i];
+            const dx = g.x - mx;
+            const dy = g.y - my;
+            const d2 = dx * dx + dy * dy;
+            if (d2 > R2) continue; // outside reveal — skip (stays white)
 
-            const dx = x - mx, dy = y - my;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            const near = hovering && dist < R;
-            const prox = near ? 1 - dist / R : 0; // 0..1
+            const dist = Math.sqrt(d2);
+            const prox = 1 - dist / R; // 1 at center, 0 at edge
+            // Smooth falloff — cubic ease for natural spotlight feel
+            const alpha = prox * prox * prox * 0.85;
 
-            if (near) {
-                // Vibrant glow
-                ctx.fillStyle = colColors[i];
-                ctx.globalAlpha = 0.4 + prox * 0.6;
-                ctx.shadowColor = colColors[i];
-                ctx.shadowBlur = prox * 16;
-                ctx.fillText(ch, x, y);
-                // White-hot core
-                if (prox > 0.6) {
-                    ctx.fillStyle = '#fff';
-                    ctx.globalAlpha = prox * 0.8;
-                    ctx.shadowBlur = 0;
-                    ctx.fillText(ch, x, y);
-                }
-            } else {
-                // Dark subtle
-                ctx.fillStyle = dimColor;
-                ctx.globalAlpha = 0.2 + Math.random() * 0.15;
-                ctx.shadowBlur = 0;
-                ctx.fillText(ch, x, y);
-            }
-
-            drops[i] += speeds[i];
-            if (drops[i] * fontSize > canvas.height && Math.random() > 0.96) {
-                drops[i] = Math.random() * -10 | 0;
-                colColors[i] = vibrantColors[(Math.random() * vibrantColors.length) | 0];
-                speeds[i] = 0.4 + Math.random() * 0.8;
-            }
+            ctx.font = g.size + 'px monospace';
+            ctx.fillStyle = COLOR;
+            ctx.globalAlpha = alpha;
+            ctx.fillText(g.ch, g.x, g.y);
         }
+
         ctx.globalAlpha = 1;
-        ctx.shadowBlur = 0;
     }
     requestAnimationFrame(draw);
 }
 
-createCodeRain('codeRain');
-createCodeRain('codeRain2');
-createCodeRain('ctaRain');
+createBinaryReveal('codeRain');
+createBinaryReveal('codeRain2');
+createBinaryReveal('ctaRain');
 
 // ============ CARD 3D TILT ON HOVER (no glow/crack lines) ============
 document.querySelectorAll('.bento-card').forEach(card => {

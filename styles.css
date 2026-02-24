@@ -510,6 +510,7 @@ a { color: inherit; text-decoration: none; }
     z-index: 1;
     opacity: 1;
     pointer-events: none;
+    background: #ffffff;
 }
 
 /* ============ BENTO GRID ============ */
@@ -825,6 +826,7 @@ a { color: inherit; text-decoration: none; }
     z-index: 1;
     opacity: 1;
     pointer-events: none;
+    background: #ffffff;
 }
 
 /* CTA reality tear — dramatic jagged rip */
