@@ -128,8 +128,8 @@ createCodeRain('ctaRain');
 document.querySelectorAll('.bento-card').forEach(card => {
     card.addEventListener('mousemove', (e) => {
         const rect = card.getBoundingClientRect();
-        const tiltX = ((e.clientX - rect.left) / rect.width - 0.5) * 8;
-        const tiltY = ((e.clientY - rect.top) / rect.height - 0.5) * -8;
+        const tiltX = ((e.clientX - rect.left) / rect.width - 0.5) * 16;
+        const tiltY = ((e.clientY - rect.top) / rect.height - 0.5) * -16;
         card.style.transform = `perspective(800px) rotateY(${tiltX}deg) rotateX(${tiltY}deg) translateY(-6px)`;
     });
     card.addEventListener('mouseleave', () => { card.style.transform = ''; });
