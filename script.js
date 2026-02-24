@@ -138,7 +138,7 @@ function createBinaryReveal(canvasId) {
         const NUM_CRACKS = 22 + (Math.random() * 10 | 0); // more cracks
         for (let i = 0; i < NUM_CRACKS; i++) {
             const angle = (i / NUM_CRACKS) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
-            const startR = BASE_R * 0.65;
+            const startR = BASE_R * 1.05; // start OUTSIDE the hole edge
             const endR = startR + 80 + Math.random() * (CRACK_R - startR - 80);
             const segments = [];
             const steps = 5 + (Math.random() * 6 | 0);
@@ -380,7 +380,7 @@ function createBinaryReveal(canvasId) {
 
         // Concentric spider web rings — more visible
         for (let ring = 0; ring < 5; ring++) {
-            const ringR = BASE_R * (0.75 + ring * 0.3);
+            const ringR = BASE_R * (1.1 + ring * 0.35); // start outside hole
             ctx.beginPath();
             const ringSteps = 70;
             for (let a = 0; a <= ringSteps; a++) {
@@ -400,7 +400,7 @@ function createBinaryReveal(canvasId) {
         // Glass shard fragments near hole edge
         for (let i = 0; i < 12; i++) {
             const a = (i / 12) * Math.PI * 2 + Math.sin(time * 0.0003 + i) * 0.15;
-            const r = BASE_R * (0.65 + Math.sin(i * 1.7) * 0.18);
+            const r = BASE_R * (1.08 + Math.sin(i * 1.7) * 0.15); // outside hole
             const cx = Math.cos(a) * r;
             const cy = Math.sin(a) * r;
             const sz = 5 + (i % 4) * 4;
