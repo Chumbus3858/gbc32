@@ -66,99 +66,94 @@ function createCodeRain(canvasId) {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    const parent = canvas.parentElement;
+    const section = canvas.closest('section') || canvas.parentElement;
 
+    // Half-res for performance + cleaner look
     function resize() {
-        canvas.width = canvas.offsetWidth;
-        canvas.height = canvas.offsetHeight;
+        canvas.width = Math.ceil(canvas.offsetWidth / 2);
+        canvas.height = Math.ceil(canvas.offsetHeight / 2);
     }
     resize();
     window.addEventListener('resize', resize);
 
-    const chars = 'アイウエオカキクケコ01{}()<>+-=ABCDEFlocal function return end';
+    const chars = '01{}()<>+-=アイウエオlocal return end';
     const vibrantColors = ['#00ffcc','#39ff14','#ff4d00','#a855f7','#eab308','#ff6b6b','#4ecdc4','#ff0055','#3b82f6','#00ff88'];
-    const dimColor = '#1a3a1a';
-    const fontSize = 15;
+    const dimColor = '#0d2a0d';
+    const fontSize = 12;
     let columns, drops, colColors, speeds;
 
     function initColumns() {
         columns = Math.floor(canvas.width / fontSize);
-        drops = Array(columns).fill(0).map(() => Math.random() * -40 | 0);
+        if (columns < 1) columns = 1;
+        drops = Array(columns).fill(0).map(() => (Math.random() * canvas.height / fontSize) | 0);
         colColors = Array(columns).fill(0).map(() => vibrantColors[(Math.random() * vibrantColors.length) | 0]);
-        speeds = Array(columns).fill(0).map(() => 0.5 + Math.random() * 1.0);
+        speeds = Array(columns).fill(0).map(() => 0.4 + Math.random() * 0.8);
     }
     initColumns();
-    window.addEventListener('resize', initColumns);
+    window.addEventListener('resize', () => { resize(); initColumns(); });
 
-    // Mouse proximity tracking
-    let mouseX = -1000, mouseY = -1000;
-    let isHovering = false;
-
-    parent.addEventListener('mousemove', (e) => {
-        const rect = canvas.getBoundingClientRect();
-        mouseX = e.clientX - rect.left;
-        mouseY = e.clientY - rect.top;
-        isHovering = true;
+    // Track mouse in canvas-local coords (half-res)
+    let mx = -9999, my = -9999, hovering = false;
+    section.addEventListener('mousemove', (e) => {
+        const r = canvas.getBoundingClientRect();
+        // Scale mouse to canvas coords (canvas is half the CSS size)
+        mx = (e.clientX - r.left) * (canvas.width / r.width);
+        my = (e.clientY - r.top) * (canvas.height / r.height);
+        hovering = true;
     });
-    parent.addEventListener('mouseleave', () => {
-        isHovering = false;
-        mouseX = -1000;
-        mouseY = -1000;
-    });
+    section.addEventListener('mouseleave', () => { hovering = false; mx = -9999; my = -9999; });
 
-    let lastFrame = 0;
-    function draw(time) {
+    let last = 0;
+    function draw(t) {
         requestAnimationFrame(draw);
-        if (time - lastFrame < 40) return;
-        lastFrame = time;
+        if (t - last < 50) return;
+        last = t;
 
-        // Fade — darker = cleaner trails
-        ctx.fillStyle = 'rgba(6, 6, 8, 0.12)';
+        // Fade previous frame
+        ctx.fillStyle = 'rgba(6, 6, 8, 0.15)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.font = fontSize + 'px monospace';
+        ctx.shadowBlur = 0;
 
-        const hoverRadius = 250;
+        const R = 180; // hover radius in canvas pixels
 
         for (let i = 0; i < columns; i++) {
-            const char = chars[(Math.random() * chars.length) | 0];
             const x = i * fontSize;
             const y = drops[i] * fontSize;
+            const ch = chars[(Math.random() * chars.length) | 0];
 
-            // Distance from mouse to this character
-            const dx = x - mouseX;
-            const dy = y - mouseY;
+            const dx = x - mx, dy = y - my;
             const dist = Math.sqrt(dx * dx + dy * dy);
-            const inRange = isHovering && dist < hoverRadius;
-            const proximity = inRange ? 1 - (dist / hoverRadius) : 0;
+            const near = hovering && dist < R;
+            const prox = near ? 1 - dist / R : 0; // 0..1
 
-            if (inRange) {
-                // VIBRANT — full color, bright, glowing
+            if (near) {
+                // Vibrant glow
                 ctx.fillStyle = colColors[i];
-                ctx.globalAlpha = 0.5 + proximity * 0.5;
+                ctx.globalAlpha = 0.4 + prox * 0.6;
                 ctx.shadowColor = colColors[i];
-                ctx.shadowBlur = proximity * 20;
+                ctx.shadowBlur = prox * 16;
+                ctx.fillText(ch, x, y);
+                // White-hot core
+                if (prox > 0.6) {
+                    ctx.fillStyle = '#fff';
+                    ctx.globalAlpha = prox * 0.8;
+                    ctx.shadowBlur = 0;
+                    ctx.fillText(ch, x, y);
+                }
             } else {
-                // DARK — dim green, subtle, clean
+                // Dark subtle
                 ctx.fillStyle = dimColor;
-                ctx.globalAlpha = 0.15 + Math.random() * 0.15;
-                ctx.shadowColor = 'transparent';
+                ctx.globalAlpha = 0.2 + Math.random() * 0.15;
                 ctx.shadowBlur = 0;
-            }
-
-            ctx.fillText(char, x, y);
-
-            // Head character — always slightly brighter
-            if (inRange && proximity > 0.5) {
-                ctx.fillStyle = '#ffffff';
-                ctx.globalAlpha = proximity;
-                ctx.fillText(char, x, y);
+                ctx.fillText(ch, x, y);
             }
 
             drops[i] += speeds[i];
-            if (y > canvas.height && Math.random() > 0.97) {
-                drops[i] = Math.random() * -20 | 0;
+            if (drops[i] * fontSize > canvas.height && Math.random() > 0.96) {
+                drops[i] = Math.random() * -10 | 0;
                 colColors[i] = vibrantColors[(Math.random() * vibrantColors.length) | 0];
-                speeds[i] = 0.5 + Math.random() * 1.0;
+                speeds[i] = 0.4 + Math.random() * 0.8;
             }
         }
         ctx.globalAlpha = 1;
