@@ -124,7 +124,16 @@ createCodeRain('codeRain');
 createCodeRain('codeRain2');
 createCodeRain('ctaRain');
 
-// Card glow/tilt removed — Tyler didn't like it
+// ============ CARD 3D TILT ON HOVER (no glow/crack lines) ============
+document.querySelectorAll('.bento-card').forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const tiltX = ((e.clientX - rect.left) / rect.width - 0.5) * 8;
+        const tiltY = ((e.clientY - rect.top) / rect.height - 0.5) * -8;
+        card.style.transform = `perspective(800px) rotateY(${tiltX}deg) rotateX(${tiltY}deg) translateY(-6px)`;
+    });
+    card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+});
 
 // ============ CARD BUTTON — BORDER TRACE + FLIP → GROW → WIGGLE → POOF ============
 function spawnPoofClouds(btn) {
