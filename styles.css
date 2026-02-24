@@ -525,6 +525,11 @@ a { color: inherit; text-decoration: none; }
     text-shadow: 0 0 10px var(--accent-glow);
 }
 
+/* Hacker tag — flicker the "// SELECTED WORK" line */
+.hacker-tag {
+    animation: tagFlicker 4s step-end infinite;
+}
+
 .section-title {
     font-family: var(--font-display);
     font-size: clamp(48px, 8vw, 96px);
@@ -534,6 +539,132 @@ a { color: inherit; text-decoration: none; }
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+}
+
+/* ============ HACKER PORTFOLIO TITLE — ENHANCED ============ */
+.hacker-title {
+    position: relative;
+    overflow: hidden;
+    display: inline-block;
+    /* Override gradient text for direct color control */
+    background: none;
+    -webkit-background-clip: unset;
+    -webkit-text-fill-color: unset;
+    background-clip: unset;
+    color: #ffffff;
+    text-shadow:
+        0 0 8px rgba(255, 255, 255, 0.3),
+        0 0 30px rgba(255, 77, 0, 0.15);
+    animation: titleFlicker 6s step-end infinite;
+}
+
+/* Glitch pseudo layers */
+.hacker-title::before,
+.hacker-title::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+}
+.hacker-title::before {
+    color: var(--cyan);
+    z-index: -1;
+    animation: glitchSlice1 3s infinite;
+    clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
+    opacity: 0;
+}
+.hacker-title::after {
+    color: var(--accent);
+    z-index: -1;
+    animation: glitchSlice2 3s infinite;
+    clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
+    opacity: 0;
+}
+
+/* The actual text container */
+.title-chars {
+    position: relative;
+    z-index: 2;
+}
+
+/* Glint / glare sweep across the title */
+.title-glint {
+    position: absolute;
+    top: 0; left: -120%;
+    width: 60%; height: 100%;
+    background: linear-gradient(
+        105deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.0) 35%,
+        rgba(255, 255, 255, 0.5) 45%,
+        rgba(255, 255, 255, 0.8) 50%,
+        rgba(255, 255, 255, 0.5) 55%,
+        rgba(255, 255, 255, 0.0) 65%,
+        transparent 100%
+    );
+    z-index: 3;
+    pointer-events: none;
+    animation: titleGlint 4s ease-in-out infinite;
+    mix-blend-mode: overlay;
+}
+
+@keyframes titleGlint {
+    0%, 70% { left: -120%; opacity: 0; }
+    72% { opacity: 1; }
+    100% { left: 180%; opacity: 0; }
+}
+
+@keyframes titleFlicker {
+    0%, 100% { opacity: 1; }
+    4.5% { opacity: 0.4; }
+    5% { opacity: 1; }
+    18% { opacity: 1; }
+    18.5% { opacity: 0.7; text-shadow: 0 0 12px rgba(255,77,0,0.6), 0 0 40px rgba(255,77,0,0.2); }
+    19% { opacity: 1; }
+    53% { opacity: 1; }
+    53.5% { opacity: 0.3; }
+    54% { opacity: 0.8; }
+    54.3% { opacity: 1; }
+    72% { opacity: 1; }
+    72.2% { opacity: 0.5; }
+    72.5% { opacity: 1; }
+}
+
+@keyframes tagFlicker {
+    0%, 100% { opacity: 1; }
+    7% { opacity: 0.3; }
+    7.5% { opacity: 1; }
+    32% { opacity: 1; }
+    32.3% { opacity: 0; }
+    32.8% { opacity: 1; }
+    61% { opacity: 1; }
+    61.2% { opacity: 0.5; }
+    61.5% { opacity: 1; }
+}
+
+@keyframes glitchSlice1 {
+    0%, 100% { opacity: 0; transform: translate(0); }
+    18% { opacity: 0; }
+    18.5% { opacity: 0.7; transform: translate(-4px, -2px); }
+    19.5% { opacity: 0.5; transform: translate(3px, 1px); }
+    20% { opacity: 0; transform: translate(0); }
+    53% { opacity: 0; }
+    53.3% { opacity: 0.6; transform: translate(5px, -1px); }
+    54% { opacity: 0; transform: translate(0); }
+}
+
+@keyframes glitchSlice2 {
+    0%, 100% { opacity: 0; transform: translate(0); }
+    18.5% { opacity: 0; }
+    19% { opacity: 0.6; transform: translate(3px, 2px); }
+    19.8% { opacity: 0; transform: translate(0); }
+    53.3% { opacity: 0; }
+    53.5% { opacity: 0.7; transform: translate(-5px, 1px); }
+    54.2% { opacity: 0; transform: translate(0); }
+    72% { opacity: 0; }
+    72.2% { opacity: 0.5; transform: translate(4px, -1px); }
+    72.6% { opacity: 0; transform: translate(0); }
 }
 
 .bento-grid {

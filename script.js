@@ -213,6 +213,68 @@ createBinaryReveal('codeRain');
 createBinaryReveal('codeRain2');
 createBinaryReveal('ctaRain');
 
+// ============ HACKER TITLE — SCRAMBLE + RESOLVE LOOP ============
+(function hackerTitle() {
+    const el = document.querySelector('.title-chars');
+    if (!el) return;
+    const ORIGINAL = 'PORTFOLIO';
+    const GLITCH_CHARS = '01@#$%&*!?/\\|{}[]<>^~+=:;アイウエオカキクケコ';
+    const CYCLE_MS = 4000;  // full cycle duration
+    const SCRAMBLE_MS = 1800; // how long it stays scrambled before resolving
+    const FRAME_MS = 60;
+
+    let phase = 'scramble'; // scramble | resolve | hold
+    let timer = 0;
+    let revealed = 0; // how many chars from left are locked to original
+
+    function tick() {
+        timer += FRAME_MS;
+
+        if (phase === 'hold') {
+            // Show original text, wait before next scramble
+            if (timer > CYCLE_MS - SCRAMBLE_MS - 600) {
+                phase = 'scramble';
+                timer = 0;
+                revealed = 0;
+            }
+        } else if (phase === 'scramble') {
+            // Full random scramble
+            let out = '';
+            for (let i = 0; i < ORIGINAL.length; i++) {
+                out += GLITCH_CHARS[Math.random() * GLITCH_CHARS.length | 0];
+            }
+            el.textContent = out;
+            if (timer > SCRAMBLE_MS) {
+                phase = 'resolve';
+                timer = 0;
+                revealed = 0;
+            }
+        } else if (phase === 'resolve') {
+            // Resolve left to right — one char every ~80ms
+            if (timer % 80 < FRAME_MS) {
+                revealed = Math.min(revealed + 1, ORIGINAL.length);
+            }
+            let out = '';
+            for (let i = 0; i < ORIGINAL.length; i++) {
+                if (i < revealed) {
+                    out += ORIGINAL[i];
+                } else {
+                    out += GLITCH_CHARS[Math.random() * GLITCH_CHARS.length | 0];
+                }
+            }
+            el.textContent = out;
+            if (revealed >= ORIGINAL.length) {
+                phase = 'hold';
+                timer = 0;
+                el.textContent = ORIGINAL;
+            }
+        }
+
+        setTimeout(tick, FRAME_MS);
+    }
+    tick();
+})();
+
 // ============ CARD 3D TILT ON HOVER (no glow/crack lines) ============
 document.querySelectorAll('.bento-card').forEach(card => {
     card.addEventListener('mousemove', (e) => {
