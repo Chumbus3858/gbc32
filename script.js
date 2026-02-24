@@ -132,71 +132,43 @@ function createBinaryReveal(canvasId) {
         }
     }
 
-    // Build crack lines — MORE of them, THICKER, MORE VISIBLE
+    // Build crack lines — FEWER, cleaner
     function buildCracks() {
         cracks = [];
-        const NUM_CRACKS = 22 + (Math.random() * 10 | 0); // more cracks
+        const NUM_CRACKS = 8 + (Math.random() * 4 | 0); // fewer cracks
         for (let i = 0; i < NUM_CRACKS; i++) {
-            const angle = (i / NUM_CRACKS) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
-            const startR = BASE_R * 1.05; // start OUTSIDE the hole edge
-            const endR = startR + 80 + Math.random() * (CRACK_R - startR - 80);
+            const angle = (i / NUM_CRACKS) * Math.PI * 2 + (Math.random() - 0.5) * 0.5;
+            const startR = BASE_R * 1.05;
+            const endR = startR + 60 + Math.random() * (CRACK_R - startR - 100);
             const segments = [];
-            const steps = 5 + (Math.random() * 6 | 0);
+            const steps = 4 + (Math.random() * 4 | 0);
             for (let s = 0; s <= steps; s++) {
                 const t = s / steps;
                 const r = startR + t * (endR - startR);
-                const jitter = (Math.random() - 0.5) * 40 * t;
-                const aJitter = (Math.random() - 0.5) * 0.18 * t;
+                const jitter = (Math.random() - 0.5) * 30 * t;
+                const aJitter = (Math.random() - 0.5) * 0.15 * t;
                 segments.push({
                     dx: Math.cos(angle + aJitter) * r + jitter,
-                    dy: Math.sin(angle + aJitter) * r + jitter * 0.8,
+                    dy: Math.sin(angle + aJitter) * r + jitter * 0.7,
                 });
             }
-            // Primary branch
+            // One branch max
             const branches = [];
-            if (Math.random() < 0.65) {
+            if (Math.random() < 0.4) {
                 const branchIdx = 1 + (Math.random() * (steps - 1) | 0);
-                const brAngle = angle + (Math.random() > 0.5 ? 1 : -1) * (0.3 + Math.random() * 0.9);
-                const brLen = 30 + Math.random() * 80;
-                const origin = segments[Math.min(branchIdx, segments.length - 1)];
-                const brSegs = [{ dx: origin.dx, dy: origin.dy }];
-                for (let b = 1; b <= 3; b++) {
-                    brSegs.push({
-                        dx: origin.dx + Math.cos(brAngle) * brLen * (b / 3) + (Math.random() - 0.5) * 18,
-                        dy: origin.dy + Math.sin(brAngle) * brLen * (b / 3) + (Math.random() - 0.5) * 12,
-                    });
-                }
-                branches.push(brSegs);
-            }
-            // Secondary branch
-            if (Math.random() < 0.4 && segments.length > 3) {
-                const branchIdx = 2 + (Math.random() * (steps - 3) | 0);
-                const brAngle = angle + (Math.random() > 0.5 ? 1 : -1) * (0.4 + Math.random() * 0.7);
-                const brLen = 20 + Math.random() * 50;
+                const brAngle = angle + (Math.random() > 0.5 ? 1 : -1) * (0.4 + Math.random() * 0.8);
+                const brLen = 25 + Math.random() * 50;
                 const origin = segments[Math.min(branchIdx, segments.length - 1)];
                 const brSegs = [{ dx: origin.dx, dy: origin.dy }];
                 for (let b = 1; b <= 2; b++) {
                     brSegs.push({
                         dx: origin.dx + Math.cos(brAngle) * brLen * (b / 2) + (Math.random() - 0.5) * 12,
-                        dy: origin.dy + Math.sin(brAngle) * brLen * (b / 2) + (Math.random() - 0.5) * 10,
+                        dy: origin.dy + Math.sin(brAngle) * brLen * (b / 2) + (Math.random() - 0.5) * 8,
                     });
                 }
                 branches.push(brSegs);
             }
-            // Tertiary micro-branch
-            if (Math.random() < 0.25 && segments.length > 4) {
-                const branchIdx = 3 + (Math.random() * (steps - 4) | 0);
-                const brAngle = angle + (Math.random() - 0.5) * 1.5;
-                const brLen = 15 + Math.random() * 30;
-                const origin = segments[Math.min(branchIdx, segments.length - 1)];
-                const brSegs = [{ dx: origin.dx, dy: origin.dy }];
-                brSegs.push({
-                    dx: origin.dx + Math.cos(brAngle) * brLen + (Math.random() - 0.5) * 8,
-                    dy: origin.dy + Math.sin(brAngle) * brLen + (Math.random() - 0.5) * 6,
-                });
-                branches.push(brSegs);
-            }
-            cracks.push({ segments, branches, width: 1.0 + Math.random() * 2.2 });
+            cracks.push({ segments, branches, width: 1.0 + Math.random() * 1.5 });
         }
     }
 
@@ -319,102 +291,96 @@ function createBinaryReveal(canvasId) {
         ctx.restore();
     }
 
-    // Draw cracked glass around the hole — HEAVIER, MORE VISIBLE
+    // Draw glitchy static cracks around the hole
     function drawCracks(time) {
         if (mx < -999) return;
         const spin = time * SPIN_SPEED;
         ctx.save();
         ctx.translate(mx, my);
-        ctx.rotate(spin); // cracks rotate with the hole
+        ctx.rotate(spin);
 
-        // Radiating crack lines — STRONGER opacity + thickness
+        // Glitchy crack lines — drawn as broken dashed segments that jitter
         for (const crack of cracks) {
             const segs = crack.segments;
-            // Main crack — DARKER, more visible
-            ctx.beginPath();
-            ctx.moveTo(segs[0].dx, segs[0].dy);
-            for (let s = 1; s < segs.length; s++) {
-                ctx.lineTo(segs[s].dx, segs[s].dy);
-            }
-            ctx.strokeStyle = 'rgba(100, 110, 125, 0.75)';
-            ctx.lineWidth = crack.width;
-            ctx.stroke();
 
-            // Dark shadow line behind crack (depth)
-            ctx.beginPath();
-            ctx.moveTo(segs[0].dx - 1, segs[0].dy + 1);
-            for (let s = 1; s < segs.length; s++) {
-                ctx.lineTo(segs[s].dx - 1, segs[s].dy + 1);
-            }
-            ctx.strokeStyle = 'rgba(30, 35, 45, 0.4)';
-            ctx.lineWidth = crack.width * 0.6;
-            ctx.stroke();
+            // Each segment drawn individually with random glitch offset + flicker
+            for (let s = 0; s < segs.length - 1; s++) {
+                // Random chance to skip a segment (glitch gap)
+                if (Math.random() < 0.2) continue;
 
-            // White refraction highlight
-            ctx.beginPath();
-            ctx.moveTo(segs[0].dx + 1.5, segs[0].dy - 0.5);
-            for (let s = 1; s < segs.length; s++) {
-                ctx.lineTo(segs[s].dx + 1.5, segs[s].dy - 0.5);
-            }
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
-            ctx.lineWidth = 0.6;
-            ctx.stroke();
+                const x1 = segs[s].dx + (Math.random() - 0.5) * 4;   // jitter position
+                const y1 = segs[s].dy + (Math.random() - 0.5) * 4;
+                const x2 = segs[s + 1].dx + (Math.random() - 0.5) * 4;
+                const y2 = segs[s + 1].dy + (Math.random() - 0.5) * 4;
 
-            // Branches — also stronger
+                // Flicker opacity
+                const flicker = 0.3 + Math.random() * 0.5;
+
+                // Main glitch line
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.strokeStyle = `rgba(100, 115, 130, ${flicker})`;
+                ctx.lineWidth = crack.width * (0.6 + Math.random() * 0.8);
+                ctx.stroke();
+
+                // Random horizontal glitch offset duplicate (TV static artifact)
+                if (Math.random() < 0.35) {
+                    const glitchOff = (Math.random() - 0.5) * 12;
+                    ctx.beginPath();
+                    ctx.moveTo(x1 + glitchOff, y1);
+                    ctx.lineTo(x2 + glitchOff, y2);
+                    ctx.strokeStyle = `rgba(160, 170, 190, ${flicker * 0.5})`;
+                    ctx.lineWidth = crack.width * 0.4;
+                    ctx.stroke();
+                }
+
+                // White flash highlight (static sparkle)
+                if (Math.random() < 0.2) {
+                    const mx2 = (x1 + x2) / 2;
+                    const my2 = (y1 + y2) / 2;
+                    ctx.beginPath();
+                    ctx.arc(mx2, my2, 1.5 + Math.random() * 2, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255, 255, 255, ${0.4 + Math.random() * 0.4})`;
+                    ctx.fill();
+                }
+            }
+
+            // Branches — same glitch treatment
             for (const br of crack.branches) {
-                ctx.beginPath();
-                ctx.moveTo(br[0].dx, br[0].dy);
-                for (let b = 1; b < br.length; b++) ctx.lineTo(br[b].dx, br[b].dy);
-                ctx.strokeStyle = 'rgba(100, 110, 125, 0.55)';
-                ctx.lineWidth = 0.9;
-                ctx.stroke();
-                // Branch highlight
-                ctx.beginPath();
-                ctx.moveTo(br[0].dx + 1, br[0].dy - 0.5);
-                for (let b = 1; b < br.length; b++) ctx.lineTo(br[b].dx + 1, br[b].dy - 0.5);
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-                ctx.lineWidth = 0.4;
-                ctx.stroke();
+                for (let b = 0; b < br.length - 1; b++) {
+                    if (Math.random() < 0.25) continue;
+                    const x1 = br[b].dx + (Math.random() - 0.5) * 3;
+                    const y1 = br[b].dy + (Math.random() - 0.5) * 3;
+                    const x2 = br[b + 1].dx + (Math.random() - 0.5) * 3;
+                    const y2 = br[b + 1].dy + (Math.random() - 0.5) * 3;
+                    ctx.beginPath();
+                    ctx.moveTo(x1, y1);
+                    ctx.lineTo(x2, y2);
+                    ctx.strokeStyle = `rgba(100, 115, 130, ${0.2 + Math.random() * 0.4})`;
+                    ctx.lineWidth = 0.6 + Math.random() * 0.6;
+                    ctx.stroke();
+                }
             }
         }
 
-        // Concentric spider web rings — more visible
-        for (let ring = 0; ring < 5; ring++) {
-            const ringR = BASE_R * (1.1 + ring * 0.35); // start outside hole
-            ctx.beginPath();
-            const ringSteps = 70;
-            for (let a = 0; a <= ringSteps; a++) {
-                const angle = (a / ringSteps) * Math.PI * 2;
-                const jit = (Math.sin(angle * 7 + ring * 2.3) * 5) + (Math.sin(time * 0.0005 + angle * 3) * 2.5);
-                const px = Math.cos(angle) * (ringR + jit);
-                const py = Math.sin(angle) * (ringR + jit);
-                if (a === 0) ctx.moveTo(px, py);
-                else ctx.lineTo(px, py);
+        // 2 spider web rings only — glitchy dashed style
+        for (let ring = 0; ring < 2; ring++) {
+            const ringR = BASE_R * (1.15 + ring * 0.45);
+            const ringSteps = 50;
+            for (let a = 0; a < ringSteps; a++) {
+                if (Math.random() < 0.3) continue; // gap in ring
+                const a1 = (a / ringSteps) * Math.PI * 2;
+                const a2 = ((a + 1) / ringSteps) * Math.PI * 2;
+                const jit1 = (Math.sin(a1 * 5 + ring) * 3) + (Math.random() - 0.5) * 4;
+                const jit2 = (Math.sin(a2 * 5 + ring) * 3) + (Math.random() - 0.5) * 4;
+                ctx.beginPath();
+                ctx.moveTo(Math.cos(a1) * (ringR + jit1), Math.sin(a1) * (ringR + jit1));
+                ctx.lineTo(Math.cos(a2) * (ringR + jit2), Math.sin(a2) * (ringR + jit2));
+                ctx.strokeStyle = `rgba(120, 130, 150, ${0.15 + Math.random() * 0.25})`;
+                ctx.lineWidth = 0.6 + Math.random() * 0.6;
+                ctx.stroke();
             }
-            ctx.closePath();
-            ctx.strokeStyle = `rgba(120, 130, 145, ${0.45 - ring * 0.07})`;
-            ctx.lineWidth = 1.4 - ring * 0.2;
-            ctx.stroke();
-        }
-
-        // Glass shard fragments near hole edge
-        for (let i = 0; i < 12; i++) {
-            const a = (i / 12) * Math.PI * 2 + Math.sin(time * 0.0003 + i) * 0.15;
-            const r = BASE_R * (1.08 + Math.sin(i * 1.7) * 0.15); // outside hole
-            const cx = Math.cos(a) * r;
-            const cy = Math.sin(a) * r;
-            const sz = 5 + (i % 4) * 4;
-            ctx.beginPath();
-            ctx.moveTo(cx - sz * 0.5, cy - sz * 0.3);
-            ctx.lineTo(cx + sz * 0.5, cy - sz * 0.15);
-            ctx.lineTo(cx + sz * 0.2, cy + sz * 0.45);
-            ctx.lineTo(cx - sz * 0.3, cy + sz * 0.3);
-            ctx.closePath();
-            ctx.fillStyle = `rgba(200, 210, 225, ${0.08 + Math.sin(time * 0.002 + i) * 0.04})`;
-            ctx.fill();
-            ctx.strokeStyle = 'rgba(180, 190, 210, 0.3)';
-            ctx.lineWidth = 0.6;
-            ctx.stroke();
         }
 
         ctx.restore();
