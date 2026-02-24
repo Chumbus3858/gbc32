@@ -546,15 +546,15 @@ a { color: inherit; text-decoration: none; }
     position: relative;
     overflow: hidden;
     display: inline-block;
-    /* Override gradient text for direct color control */
-    background: none;
-    -webkit-background-clip: unset;
-    -webkit-text-fill-color: unset;
-    background-clip: unset;
-    color: #ffffff;
+    /* Force override gradient text — must use !important to beat .section-title */
+    background: none !important;
+    -webkit-background-clip: unset !important;
+    -webkit-text-fill-color: #000000 !important;
+    background-clip: unset !important;
+    color: #000000 !important;
     text-shadow:
-        0 0 8px rgba(255, 255, 255, 0.3),
-        0 0 30px rgba(255, 77, 0, 0.15);
+        0 0 1px rgba(0, 0, 0, 0.8),
+        0 0 20px rgba(0, 0, 0, 0.12);
     animation: titleFlicker 6s step-end infinite;
 }
 

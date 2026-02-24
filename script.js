@@ -61,25 +61,67 @@ function createStaticCanvas(canvasId) {
 createStaticCanvas('loaderStatic');
 createStaticCanvas('heroStatic');
 
-// ============ BINARY REVEAL — FALLING + MORPHING + MOUSE FLASHLIGHT + VIGNETTES ============
+// ============ BROKEN WINDOW REVEAL — CRACKED GLASS + FALLING SYMBOLS ============
 function createBinaryReveal(canvasId) {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     const section = canvas.closest('section') || canvas.parentElement;
 
-    const GAP_X = 32;
-    const GAP_Y = 26;
+    const GAP_X = 30;
+    const GAP_Y = 24;
     const FONT_SIZE = 13;
-    const REVEAL_R = 280;
-    const FALL_SPEED = 0.4; // pixels per frame
-    const MORPH_CHANCE = 0.02; // chance per cell per frame to change symbol
+    const HOLE_R = 220;       // inner clear hole radius
+    const CRACK_R = 340;      // outer crack reach
+    const FALL_SPEED = 0.4;
+    const MORPH_CHANCE = 0.03;
     const SYMBOLS = '01{}()<>+-=.:;|/\\01010101アイウエオカキクケコ';
     let cols = 0, rows = 0, cells = [];
 
+    // Generate jagged crack lines radiating from center of hole
+    let cracks = [];
+    function buildCracks() {
+        cracks = [];
+        const NUM_CRACKS = 14 + (Math.random() * 6 | 0);
+        for (let i = 0; i < NUM_CRACKS; i++) {
+            const angle = (i / NUM_CRACKS) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
+            const len = HOLE_R * 0.7 + Math.random() * (CRACK_R - HOLE_R) * 0.9;
+            const segments = [];
+            const steps = 5 + (Math.random() * 4 | 0);
+            for (let s = 0; s <= steps; s++) {
+                const t = s / steps;
+                const r = HOLE_R * 0.85 + t * (len - HOLE_R * 0.85);
+                const jitter = (Math.random() - 0.5) * 28 * t;
+                segments.push({
+                    dx: Math.cos(angle + jitter * 0.01) * r + jitter,
+                    dy: Math.sin(angle + jitter * 0.01) * r + jitter * 0.7,
+                });
+            }
+            // Sub-branches
+            const branches = [];
+            if (Math.random() < 0.6) {
+                const branchAt = 1 + (Math.random() * (steps - 2) | 0);
+                const brAngle = angle + (Math.random() - 0.5) * 1.2;
+                const brLen = 30 + Math.random() * 60;
+                const brSteps = 3;
+                const origin = segments[branchAt];
+                const brSegs = [{ dx: origin.dx, dy: origin.dy }];
+                for (let b = 1; b <= brSteps; b++) {
+                    const bt = b / brSteps;
+                    brSegs.push({
+                        dx: origin.dx + Math.cos(brAngle) * brLen * bt + (Math.random() - 0.5) * 12,
+                        dy: origin.dy + Math.sin(brAngle) * brLen * bt + (Math.random() - 0.5) * 8,
+                    });
+                }
+                branches.push(brSegs);
+            }
+            cracks.push({ segments, branches, width: 1 + Math.random() * 1.5 });
+        }
+    }
+
     function buildGrid() {
         cols = Math.floor(canvas.width / GAP_X) + 1;
-        rows = Math.floor(canvas.height / GAP_Y) + 3; // extra rows for scroll buffer
+        rows = Math.floor(canvas.height / GAP_Y) + 3;
         cells = [];
         for (let c = 0; c < cols; c++) {
             const col = [];
@@ -87,7 +129,7 @@ function createBinaryReveal(canvasId) {
                 col.push({
                     ch: SYMBOLS[Math.random() * SYMBOLS.length | 0],
                     speed: FALL_SPEED + Math.random() * 0.3,
-                    yOff: 0, // sub-pixel offset for smooth fall
+                    yOff: 0,
                 });
             }
             cells.push(col);
@@ -98,6 +140,7 @@ function createBinaryReveal(canvasId) {
         canvas.width = canvas.offsetWidth;
         canvas.height = canvas.offsetHeight;
         buildGrid();
+        buildCracks();
     }
     resize();
     window.addEventListener('resize', resize);
@@ -111,37 +154,87 @@ function createBinaryReveal(canvasId) {
     });
     section.addEventListener('mouseleave', () => { mx = -9999; my = -9999; });
 
-    // Pre-build edge vignette gradient (dark shading around edges)
-    function drawEdgeVignette() {
-        const w = canvas.width, h = canvas.height;
-        const grad = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.25, w / 2, h / 2, Math.max(w, h) * 0.75);
-        grad.addColorStop(0, 'rgba(255,255,255,0)');
-        grad.addColorStop(0.5, 'rgba(200,200,200,0.15)');
-        grad.addColorStop(0.8, 'rgba(100,100,100,0.4)');
-        grad.addColorStop(1, 'rgba(30,30,30,0.7)');
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 0, w, h);
+    // Draw cracked glass edges around the hole
+    function drawCracks() {
+        if (mx < -999) return;
+        ctx.save();
+        ctx.translate(mx, my);
+
+        // Draw each crack line
+        for (let i = 0; i < cracks.length; i++) {
+            const crack = cracks[i];
+            const segs = crack.segments;
+
+            // Main crack line
+            ctx.beginPath();
+            ctx.moveTo(segs[0].dx, segs[0].dy);
+            for (let s = 1; s < segs.length; s++) {
+                ctx.lineTo(segs[s].dx, segs[s].dy);
+            }
+            ctx.strokeStyle = 'rgba(80, 90, 100, 0.6)';
+            ctx.lineWidth = crack.width;
+            ctx.stroke();
+
+            // Thin white highlight beside crack (glass refraction)
+            ctx.beginPath();
+            ctx.moveTo(segs[0].dx + 1, segs[0].dy + 1);
+            for (let s = 1; s < segs.length; s++) {
+                ctx.lineTo(segs[s].dx + 1, segs[s].dy + 1);
+            }
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.lineWidth = 0.5;
+            ctx.stroke();
+
+            // Sub-branches
+            for (const br of crack.branches) {
+                ctx.beginPath();
+                ctx.moveTo(br[0].dx, br[0].dy);
+                for (let b = 1; b < br.length; b++) {
+                    ctx.lineTo(br[b].dx, br[b].dy);
+                }
+                ctx.strokeStyle = 'rgba(80, 90, 100, 0.4)';
+                ctx.lineWidth = 0.8;
+                ctx.stroke();
+            }
+        }
+
+        // Concentric ring cracks (spider web pattern)
+        for (let ring = 0; ring < 3; ring++) {
+            const r = HOLE_R * (0.9 + ring * 0.25);
+            ctx.beginPath();
+            for (let a = 0; a < Math.PI * 2; a += 0.05) {
+                const jit = (Math.random() - 0.5) * 6;
+                const px = Math.cos(a) * (r + jit);
+                const py = Math.sin(a) * (r + jit);
+                if (a === 0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
+            ctx.closePath();
+            ctx.strokeStyle = `rgba(80, 90, 100, ${0.35 - ring * 0.1})`;
+            ctx.lineWidth = 1 - ring * 0.2;
+            ctx.stroke();
+        }
+
+        ctx.restore();
     }
 
-    // Green glow vignette around mouse reveal
-    function drawMouseVignette() {
-        if (mx < -999) return;
-        const grad = ctx.createRadialGradient(mx, my, 0, mx, my, REVEAL_R);
-        grad.addColorStop(0, 'rgba(0, 255, 100, 0.0)');
-        grad.addColorStop(0.5, 'rgba(0, 255, 80, 0.0)');
-        grad.addColorStop(0.75, 'rgba(0, 255, 80, 0.06)');
-        grad.addColorStop(0.92, 'rgba(0, 200, 60, 0.18)');
-        grad.addColorStop(1, 'rgba(0, 160, 50, 0.35)');
+    // Dark edge vignette
+    function drawEdgeVignette() {
+        const w = canvas.width, h = canvas.height;
+        const grad = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.2, w / 2, h / 2, Math.max(w, h) * 0.72);
+        grad.addColorStop(0, 'rgba(255,255,255,0)');
+        grad.addColorStop(0.45, 'rgba(210,210,210,0.12)');
+        grad.addColorStop(0.7, 'rgba(120,120,120,0.35)');
+        grad.addColorStop(0.9, 'rgba(40,40,40,0.65)');
+        grad.addColorStop(1, 'rgba(10,10,10,0.82)');
         ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(mx, my, REVEAL_R, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.fillRect(0, 0, w, h);
     }
 
     let last = 0;
     function draw(t) {
         requestAnimationFrame(draw);
-        if (t - last < 40) return; // ~25fps
+        if (t - last < 40) return;
         last = t;
 
         const W = canvas.width, H = canvas.height;
@@ -154,26 +247,20 @@ function createBinaryReveal(canvasId) {
         ctx.textBaseline = 'middle';
         ctx.font = FONT_SIZE + 'px monospace';
 
-        const R = REVEAL_R;
+        const R = HOLE_R;
         const R2 = R * R;
 
-        // Update + draw cells
+        // Update + draw cells ONLY inside the broken hole
         for (let c = 0; c < cols; c++) {
             const col = cells[c];
             const baseX = c * GAP_X + GAP_X / 2;
 
             for (let r = 0; r < rows; r++) {
                 const cell = col[r];
-
-                // Fall: shift offset down
                 cell.yOff += cell.speed;
-
-                // Morph: randomly change symbol
                 if (Math.random() < MORPH_CHANCE) {
                     cell.ch = SYMBOLS[Math.random() * SYMBOLS.length | 0];
                 }
-
-                // Wrap: when a cell falls past one row height, shift back and re-randomize
                 if (cell.yOff >= GAP_Y) {
                     cell.yOff -= GAP_Y;
                     cell.ch = SYMBOLS[Math.random() * SYMBOLS.length | 0];
@@ -182,28 +269,43 @@ function createBinaryReveal(canvasId) {
                 const drawY = r * GAP_Y + GAP_Y / 2 + cell.yOff;
                 if (drawY < -GAP_Y || drawY > H + GAP_Y) continue;
 
-                // Distance to mouse
+                // Only visible through the broken hole
                 const dx = baseX - mx;
                 const dy = drawY - my;
                 const d2 = dx * dx + dy * dy;
-                if (d2 > R2) continue; // outside reveal — stays hidden
+                if (d2 > R2) continue;
 
                 const dist = Math.sqrt(d2);
                 const prox = 1 - dist / R;
-                const alpha = prox * prox * 0.9; // quadratic falloff
+                // Sharp edge — visible almost to the edge, then sharp cutoff
+                const alpha = Math.min(1, prox * 2.5) * 0.85;
 
-                ctx.fillStyle = '#1a2744';
+                ctx.fillStyle = '#0a1628';
                 ctx.globalAlpha = alpha;
                 ctx.fillText(cell.ch, baseX, drawY);
             }
         }
-
         ctx.globalAlpha = 1;
 
-        // Green vignette ring around mouse spotlight
-        drawMouseVignette();
+        // Dark background visible through hole (behind the text)
+        if (mx > -999) {
+            ctx.save();
+            ctx.globalCompositeOperation = 'destination-over';
+            const holeGrad = ctx.createRadialGradient(mx, my, 0, mx, my, R);
+            holeGrad.addColorStop(0, 'rgba(6, 8, 18, 0.92)');
+            holeGrad.addColorStop(0.8, 'rgba(6, 8, 18, 0.85)');
+            holeGrad.addColorStop(1, 'rgba(6, 8, 18, 0)');
+            ctx.fillStyle = holeGrad;
+            ctx.beginPath();
+            ctx.arc(mx, my, R, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
 
-        // Dark edge vignette — shady edges
+        // Draw cracked glass edges
+        drawCracks();
+
+        // Dark edge vignette — shady overall
         drawEdgeVignette();
     }
     requestAnimationFrame(draw);
