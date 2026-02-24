@@ -75,8 +75,8 @@ function createCodeRain(canvasId) {
     window.addEventListener('resize', resize);
 
     const chars = 'ローカル関数戻値真偽01{}()=<>+-*/ABCDEFGHIJKLlocal function return if then end while';
-    const headColors = ['#ffffff','#00ffcc','#39ff14','#ff4d00','#a855f7','#eab308'];
-    const trailColors = ['#00ff41','#00ffcc','#39ff14','#00ff88','#66ff33','#a855f7','#3b82f6'];
+    const headColors = ['#ffffff','#00ffcc','#39ff14','#ff4d00','#a855f7','#eab308','#ff6b6b','#4ecdc4'];
+    const trailColors = ['#00ff41','#00ffcc','#39ff14','#00ff88','#66ff33','#a855f7','#3b82f6','#ff4d00','#eab308','#ff6b6b','#4ecdc4'];
     const fontSize = 10;
     const columns = Math.floor(canvas.width / fontSize);
     const drops = Array(columns).fill(0).map(() => Math.random() * -20 | 0);
@@ -89,7 +89,7 @@ function createCodeRain(canvasId) {
         if (time - lastFrame < 50) return;
         lastFrame = time;
 
-        ctx.fillStyle = 'rgba(6, 6, 8, 0.06)';
+        ctx.fillStyle = 'rgba(6, 6, 8, 0.04)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.font = fontSize + 'px monospace';
 
@@ -99,13 +99,13 @@ function createCodeRain(canvasId) {
             const y = drops[i] * fontSize;
             const r = Math.random();
 
-            if (r > 0.92) {
+            if (r > 0.88) {
                 // Bright head flash
                 ctx.fillStyle = headColors[(Math.random() * headColors.length) | 0];
-                ctx.globalAlpha = 0.7 + Math.random() * 0.3;
+                ctx.globalAlpha = 0.85 + Math.random() * 0.15;
             } else {
                 ctx.fillStyle = colColors[i];
-                ctx.globalAlpha = 0.06 + Math.random() * 0.18;
+                ctx.globalAlpha = 0.15 + Math.random() * 0.35;
             }
             ctx.fillText(char, x, y);
 
