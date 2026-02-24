@@ -561,6 +561,320 @@ createBinaryReveal('ctaRain');
     tick();
 })();
 
+// ============ CHERRY BLOSSOM SCENE — TREES + PETALS + CLOUDS + WIND ============
+const SAKURA_COLORS = ['#CC2233','#DD3344','#BB1122','#EE4455','#AA0011','#FF6677','#990022'];
+
+function createSakuraScene(canvasId) {
+    const canvas = document.getElementById(canvasId);
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let W, H;
+
+    let branches = [];
+    let blossoms = [];
+    let petals = [];
+    let clouds = [];
+    let windLines = [];
+
+    const GLITCH_CHARS = 'アイウエオ01{}カキ<>;://\\|';
+    const NUM_PETALS = 50;
+    const NUM_CLOUDS = 5;
+    const NUM_WIND = 10;
+
+    function resize() {
+        W = canvas.offsetWidth;
+        H = canvas.offsetHeight;
+        canvas.width = W;
+        canvas.height = H;
+        generateAll();
+    }
+
+    function generateAll() {
+        branches = [];
+        blossoms = [];
+        // 3 trees — left, center, right
+        const treeDefs = [
+            { x: W * 0.1, angle: -1.3, len: H * 0.52, maxD: 6, w: 11 },
+            { x: W * 0.48, angle: -1.57, len: H * 0.62, maxD: 7, w: 14 },
+            { x: W * 0.88, angle: -1.8, len: H * 0.48, maxD: 6, w: 10 },
+        ];
+        for (const td of treeDefs) {
+            growBranch(td.x, H + 30, td.angle, td.len, td.w, 0, td.maxD);
+        }
+        initPetals();
+        initClouds();
+        initWind();
+    }
+
+    function growBranch(x, y, angle, len, width, depth, maxD) {
+        if (depth > maxD || width < 0.4 || len < 4) return;
+        const endX = x + Math.cos(angle) * len;
+        const endY = y + Math.sin(angle) * len;
+        const cpX = (x + endX) / 2 + (Math.random() - 0.5) * len * 0.3;
+        const cpY = (y + endY) / 2 + (Math.random() - 0.5) * len * 0.15;
+
+        branches.push({ x1: x, y1: y, x2: endX, y2: endY, cpX, cpY, width, depth });
+
+        // Blossoms near tips
+        if (depth >= maxD - 1 || (depth === maxD - 2 && Math.random() < 0.4)) {
+            const n = 3 + (Math.random() * 7 | 0);
+            for (let i = 0; i < n; i++) {
+                blossoms.push({
+                    x: endX + (Math.random() - 0.5) * 20,
+                    y: endY + (Math.random() - 0.5) * 16,
+                    r: 2 + Math.random() * 5.5,
+                    color: SAKURA_COLORS[Math.random() * SAKURA_COLORS.length | 0],
+                    phase: Math.random() * Math.PI * 2,
+                    depth,
+                });
+            }
+        }
+
+        const nSub = depth < 2 ? 3 : (2 + (Math.random() < 0.35 ? 1 : 0));
+        for (let i = 0; i < nSub; i++) {
+            const spread = nSub === 1 ? 0 : ((i / (nSub - 1) - 0.5) * (0.8 + depth * 0.08));
+            growBranch(endX, endY, angle + spread + (Math.random() - 0.5) * 0.3,
+                len * (0.52 + Math.random() * 0.22), width * (0.58 + Math.random() * 0.15),
+                depth + 1, maxD);
+        }
+    }
+
+    function makePetal() {
+        return {
+            x: Math.random() * W,
+            y: -10 - Math.random() * H * 0.3,
+            vx: 0.2 + Math.random() * 0.5,
+            vy: 0.25 + Math.random() * 0.55,
+            rot: Math.random() * Math.PI * 2,
+            rotSpd: (Math.random() - 0.5) * 0.06,
+            size: 3 + Math.random() * 4.5,
+            color: SAKURA_COLORS[Math.random() * SAKURA_COLORS.length | 0],
+            sway: Math.random() * Math.PI * 2,
+            swaySpd: 0.4 + Math.random() * 1.2,
+            swayAmp: 12 + Math.random() * 22,
+            glitch: false, glitchT: 0, glitchCh: '',
+        };
+    }
+    function initPetals() {
+        petals = [];
+        for (let i = 0; i < NUM_PETALS; i++) {
+            const p = makePetal();
+            p.y = Math.random() * H; // spread initially
+            petals.push(p);
+        }
+    }
+
+    function initClouds() {
+        clouds = [];
+        for (let i = 0; i < NUM_CLOUDS; i++) {
+            clouds.push({
+                x: Math.random() * W * 1.5 - W * 0.25,
+                y: 15 + Math.random() * H * 0.28,
+                speed: 0.12 + Math.random() * 0.25,
+                scale: 0.5 + Math.random() * 0.9,
+                alpha: 0.035 + Math.random() * 0.05,
+            });
+        }
+    }
+
+    function makeWindLine() {
+        return {
+            x: -80 - Math.random() * 200,
+            y: 20 + Math.random() * (H - 40),
+            len: 40 + Math.random() * 130,
+            speed: 1.8 + Math.random() * 3.5,
+            alpha: 0.025 + Math.random() * 0.06,
+            curve: (Math.random() - 0.5) * 10,
+        };
+    }
+    function initWind() {
+        windLines = [];
+        for (let i = 0; i < NUM_WIND; i++) windLines.push(makeWindLine());
+    }
+
+    // Japanese cloud — scalloped bumps
+    function drawCloud(c) {
+        ctx.save();
+        ctx.translate(c.x, c.y);
+        ctx.scale(c.scale, c.scale);
+        ctx.globalAlpha = c.alpha;
+        ctx.beginPath();
+        ctx.arc(-45, 0, 22, Math.PI, 0);
+        ctx.arc(-15, -7, 26, Math.PI, 0);
+        ctx.arc(16, -4, 22, Math.PI, 0);
+        ctx.arc(40, 1, 17, Math.PI, 0);
+        ctx.lineTo(57, 16);
+        ctx.quadraticCurveTo(25, 20, 0, 18);
+        ctx.quadraticCurveTo(-30, 20, -67, 16);
+        ctx.closePath();
+        ctx.fillStyle = '#c0c0d0';
+        ctx.fill();
+        // Inner highlight
+        ctx.beginPath();
+        ctx.arc(-12, -3, 16, Math.PI, 0);
+        ctx.arc(14, -5, 14, Math.PI, 0);
+        ctx.closePath();
+        ctx.fillStyle = '#d8d8e8';
+        ctx.globalAlpha = c.alpha * 0.5;
+        ctx.fill();
+        ctx.restore();
+    }
+
+    let lastFrame = 0;
+    function draw(t) {
+        requestAnimationFrame(draw);
+        if (t - lastFrame < 33) return;
+        lastFrame = t;
+
+        ctx.clearRect(0, 0, W, H);
+
+        const swayBase = Math.sin(t * 0.0007) * 10;
+
+        // Clouds (behind trees)
+        for (const c of clouds) {
+            drawCloud(c);
+            c.x += c.speed;
+            if (c.x > W + 120) { c.x = -160 * c.scale; c.y = 15 + Math.random() * H * 0.28; }
+        }
+
+        // Wind trails
+        ctx.save();
+        ctx.lineWidth = 1;
+        for (const wl of windLines) {
+            ctx.beginPath();
+            ctx.moveTo(wl.x, wl.y);
+            ctx.quadraticCurveTo(wl.x + wl.len * 0.5, wl.y + wl.curve, wl.x + wl.len, wl.y);
+            ctx.strokeStyle = `rgba(200,200,220,${wl.alpha})`;
+            ctx.stroke();
+            wl.x += wl.speed;
+            if (wl.x > W + 60) Object.assign(wl, makeWindLine());
+        }
+        ctx.restore();
+
+        // Tree branches with sway
+        ctx.save();
+        ctx.lineCap = 'round';
+        for (const b of branches) {
+            const hf = Math.max(0, 1 - b.y2 / H); // height factor
+            const sway = swayBase * hf * (b.depth * 0.14 + 0.08);
+            const dark = Math.max(0, 1 - b.depth * 0.07);
+            ctx.beginPath();
+            ctx.moveTo(b.x1 + sway * 0.25, b.y1);
+            ctx.quadraticCurveTo(b.cpX + sway * 0.6, b.cpY, b.x2 + sway, b.y2);
+            ctx.strokeStyle = `rgb(${(28 * dark + 8)|0},${(16 * dark + 4)|0},${(10 * dark + 2)|0})`;
+            ctx.lineWidth = b.width;
+            ctx.stroke();
+        }
+        ctx.restore();
+
+        // Blossoms
+        for (const bl of blossoms) {
+            const hf = Math.max(0, 1 - bl.y / H);
+            const sway = swayBase * hf * (bl.depth * 0.14 + 0.08);
+            const pulse = Math.sin(t * 0.002 + bl.phase) * 0.12 + 1;
+            ctx.globalAlpha = 0.72 + Math.sin(t * 0.003 + bl.phase) * 0.18;
+            ctx.beginPath();
+            ctx.arc(bl.x + sway, bl.y, bl.r * pulse, 0, Math.PI * 2);
+            ctx.fillStyle = bl.color;
+            ctx.fill();
+            // Light center
+            ctx.beginPath();
+            ctx.arc(bl.x + sway - bl.r * 0.2, bl.y - bl.r * 0.15, bl.r * 0.35, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255,190,190,0.3)';
+            ctx.fill();
+        }
+        ctx.globalAlpha = 1;
+
+        // Falling petals
+        for (let i = 0; i < petals.length; i++) {
+            const p = petals[i];
+            p.x += p.vx + Math.sin(t * 0.001 * p.swaySpd + p.sway) * p.swayAmp * 0.018;
+            p.y += p.vy;
+            p.rot += p.rotSpd;
+
+            // Glitch
+            if (p.glitch) {
+                p.glitchT--;
+                if (p.glitchT <= 0) p.glitch = false;
+            } else if (Math.random() < 0.018) {
+                p.glitch = true;
+                p.glitchT = 3 + (Math.random() * 6 | 0);
+                p.glitchCh = GLITCH_CHARS[Math.random() * GLITCH_CHARS.length | 0];
+            }
+
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.rot);
+            if (p.glitch) {
+                ctx.font = `${p.size * 2.5}px monospace`;
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = 0.6 + Math.random() * 0.3;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(p.glitchCh, 0, 0);
+                if (Math.random() < 0.5) {
+                    ctx.globalAlpha = 0.25;
+                    ctx.fillText(p.glitchCh, (Math.random() - 0.5) * 8, 0);
+                }
+            } else {
+                ctx.beginPath();
+                ctx.ellipse(0, 0, p.size, p.size * 0.55, 0, 0, Math.PI * 2);
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = 0.65 + Math.random() * 0.2;
+                ctx.fill();
+                ctx.beginPath();
+                ctx.ellipse(-p.size * 0.2, -p.size * 0.12, p.size * 0.35, p.size * 0.2, 0, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255,200,200,0.25)';
+                ctx.fill();
+            }
+            ctx.restore();
+
+            if (p.y > H + 25 || p.x > W + 60) {
+                petals[i] = makePetal();
+            }
+        }
+
+        // Bottom gradient fade to blend into tape section
+        ctx.globalAlpha = 1;
+        const grad = ctx.createLinearGradient(0, H - 70, 0, H);
+        grad.addColorStop(0, 'rgba(10, 5, 8, 0)');
+        grad.addColorStop(1, 'rgba(10, 5, 8, 0.85)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, H - 70, W, 70);
+    }
+
+    resize();
+    window.addEventListener('resize', resize);
+    requestAnimationFrame(draw);
+}
+createSakuraScene('sakuraCanvas');
+
+// ============ TAPE BUTTON — CHERRY BLOSSOM PETAL BURST ON HOVER ============
+document.querySelectorAll('.tape-btn').forEach(btn => {
+    btn.addEventListener('mouseenter', (e) => {
+        const rect = btn.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        for (let i = 0; i < 14; i++) {
+            const el = document.createElement('div');
+            el.className = 'sakura-burst-petal';
+            const angle = (i / 14) * Math.PI * 2 + (Math.random() - 0.5) * 0.6;
+            const dist = 25 + Math.random() * 55;
+            const size = 5 + Math.random() * 7;
+            el.style.left = cx + 'px';
+            el.style.top = cy + 'px';
+            el.style.width = size + 'px';
+            el.style.height = (size * 0.6) + 'px';
+            el.style.background = SAKURA_COLORS[Math.random() * SAKURA_COLORS.length | 0];
+            el.style.setProperty('--endX', (Math.cos(angle) * dist) + 'px');
+            el.style.setProperty('--endY', (Math.sin(angle) * dist + 15) + 'px');
+            el.style.setProperty('--rot', (Math.random() * 360) + 'deg');
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 900);
+        }
+    });
+});
+
 // ============ CARD 3D TILT ON HOVER (no glow/crack lines) ============
 document.querySelectorAll('.bento-card').forEach(card => {
     card.addEventListener('mousemove', (e) => {
