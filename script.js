@@ -68,49 +68,51 @@ function createCodeRain(canvasId) {
     const ctx = canvas.getContext('2d');
 
     function resize() {
-        canvas.width = canvas.offsetWidth / 2;
-        canvas.height = canvas.offsetHeight / 2;
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
     }
     resize();
     window.addEventListener('resize', resize);
 
     const chars = 'ローカル関数戻値真偽01{}()=<>+-*/ABCDEFGHIJKLlocal function return if then end while';
-    const headColors = ['#ffffff','#00ffcc','#39ff14','#ff4d00','#a855f7','#eab308','#ff6b6b','#4ecdc4'];
-    const trailColors = ['#00ff41','#00ffcc','#39ff14','#00ff88','#66ff33','#a855f7','#3b82f6','#ff4d00','#eab308','#ff6b6b','#4ecdc4'];
-    const fontSize = 14;
+    const headColors = ['#ffffff','#00ffcc','#39ff14','#ff4d00','#a855f7','#eab308','#ff6b6b','#4ecdc4','#ff0055','#00ff88'];
+    const trailColors = ['#00ff41','#00ffcc','#39ff14','#00ff88','#66ff33','#a855f7','#3b82f6','#ff4d00','#eab308','#ff6b6b','#4ecdc4','#ff0055'];
+    const fontSize = 16;
     const columns = Math.floor(canvas.width / fontSize);
-    const drops = Array(columns).fill(0).map(() => Math.random() * -20 | 0);
-    // Give each column a color
+    const drops = Array(columns).fill(0).map(() => Math.random() * -30 | 0);
     const colColors = Array(columns).fill(0).map(() => trailColors[(Math.random() * trailColors.length) | 0]);
 
     let lastFrame = 0;
     function draw(time) {
         requestAnimationFrame(draw);
-        if (time - lastFrame < 50) return;
+        if (time - lastFrame < 45) return;
         lastFrame = time;
 
-        ctx.fillStyle = 'rgba(6, 6, 8, 0.03)';
+        // Very subtle fade — lets trails build up bright
+        ctx.fillStyle = 'rgba(6, 6, 8, 0.05)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.font = fontSize + 'px monospace';
+        ctx.font = 'bold ' + fontSize + 'px monospace';
 
         for (let i = 0; i < drops.length; i++) {
             const char = chars[(Math.random() * chars.length) | 0];
             const x = i * fontSize;
             const y = drops[i] * fontSize;
-            const r = Math.random();
 
-            if (r > 0.75) {
-                // Bright head flash — frequent and vivid
-                ctx.fillStyle = headColors[(Math.random() * headColors.length) | 0];
-                ctx.globalAlpha = 0.9 + Math.random() * 0.1;
-            } else {
-                ctx.fillStyle = colColors[i];
-                ctx.globalAlpha = 0.4 + Math.random() * 0.4;
-            }
+            // Head character — FULL brightness white/colored
+            ctx.fillStyle = headColors[(Math.random() * headColors.length) | 0];
+            ctx.globalAlpha = 1.0;
             ctx.fillText(char, x, y);
 
+            // Trail glow — slightly dimmer but still very visible
+            if (drops[i] > 1) {
+                const trailChar = chars[(Math.random() * chars.length) | 0];
+                ctx.fillStyle = colColors[i];
+                ctx.globalAlpha = 0.6 + Math.random() * 0.3;
+                ctx.fillText(trailChar, x, (drops[i] - 1) * fontSize);
+            }
+
             if (y > canvas.height && Math.random() > 0.975) {
-                drops[i] = 0;
+                drops[i] = Math.random() * -15 | 0;
                 colColors[i] = trailColors[(Math.random() * trailColors.length) | 0];
             }
             drops[i]++;
