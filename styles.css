@@ -559,72 +559,13 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* Card glow tracking */
-.card-glow {
-    position: absolute;
-    inset: 0;
-    border-radius: 8px;
-    opacity: 0;
-    transition: opacity 0.4s;
-    background: radial-gradient(ellipse at var(--glow-x, 50%) var(--glow-y, 50%),
-        rgba(255, 77, 0, 0.08) 0%, transparent 60%);
-    pointer-events: none;
-    z-index: 1;
-}
-
-/* ===== CRACK EFFECT ON HOVER ===== */
-.card-crack {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    z-index: 3;
-    opacity: 0;
-    transition: opacity 0.3s;
-}
-
-/* Crack lines radiating from cursor */
-.card-crack::before {
-    content: '';
-    position: absolute;
-    left: var(--crack-x, 50%);
-    top: var(--crack-y, 50%);
-    width: 200px;
-    height: 200px;
-    transform: translate(-50%, -50%);
-    background:
-        /* Central cracks */
-        linear-gradient(15deg, transparent 47%, rgba(255,77,0,0.6) 47.5%, rgba(255,77,0,0.6) 48%, transparent 48.5%),
-        linear-gradient(-25deg, transparent 46%, rgba(0,255,204,0.4) 46.5%, rgba(0,255,204,0.4) 47%, transparent 47.5%),
-        linear-gradient(65deg, transparent 48%, rgba(255,77,0,0.5) 48.5%, rgba(255,77,0,0.5) 49%, transparent 49.5%),
-        linear-gradient(-50deg, transparent 47%, rgba(168,85,247,0.3) 47.5%, rgba(168,85,247,0.3) 48%, transparent 48.5%),
-        linear-gradient(120deg, transparent 49%, rgba(255,77,0,0.3) 49.2%, rgba(255,77,0,0.3) 49.5%, transparent 49.7%),
-        linear-gradient(-80deg, transparent 48%, rgba(0,255,204,0.25) 48.3%, rgba(0,255,204,0.25) 48.6%, transparent 49%),
-        linear-gradient(40deg, transparent 49%, rgba(255,200,0,0.2) 49.3%, rgba(255,200,0,0.2) 49.6%, transparent 50%);
-    filter: blur(0.3px);
-}
-
-/* Crack glow halo */
-.card-crack::after {
-    content: '';
-    position: absolute;
-    left: var(--crack-x, 50%);
-    top: var(--crack-y, 50%);
-    width: 120px;
-    height: 120px;
-    transform: translate(-50%, -50%);
-    background: radial-gradient(circle, rgba(255,77,0,0.15) 0%, transparent 70%);
-    filter: blur(8px);
-}
-
-.bento-card:hover .card-crack {
-    opacity: 1;
-}
+.card-glow, .card-crack { display: none; }
 
 .bento-card:hover {
     background: var(--bg-elevated);
     border-color: rgba(255, 77, 0, 0.3);
     box-shadow: 0 0 40px rgba(255, 77, 0, 0.08), 0 20px 60px rgba(0, 0, 0, 0.4);
 }
-.bento-card:hover .card-glow { opacity: 1; }
 
 .bento-large { grid-column: span 1; min-height: 380px; }
 .bento-small { grid-column: span 1; min-height: 280px; }
