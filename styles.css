@@ -243,9 +243,10 @@ a { color: inherit; text-decoration: none; }
     position: absolute;
     inset: 0;
     width: 100%; height: 100%;
-    opacity: 0.06;
+    opacity: 0.08;
     z-index: 0;
     image-rendering: pixelated;
+    filter: contrast(1.3);
 }
 
 .hero-grid-bg {
@@ -506,16 +507,7 @@ a { color: inherit; text-decoration: none; }
     overflow: hidden;
 }
 
-/* TV Static + Code Rain combined bg */
-.portfolio-static-bg {
-    position: absolute;
-    inset: 0;
-    width: 100%; height: 100%;
-    z-index: 0;
-    opacity: 0.03;
-    image-rendering: pixelated;
-}
-
+/* Code Rain bg */
 .code-rain-bg {
     position: absolute;
     inset: 0;
@@ -891,14 +883,6 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* CTA backgrounds */
-.cta-static-bg {
-    position: absolute;
-    inset: 0;
-    width: 100%; height: 100%;
-    z-index: 0;
-    opacity: 0.04;
-    image-rendering: pixelated;
-}
 .cta-rain-bg {
     position: absolute;
     inset: 0;

@@ -1,9 +1,9 @@
-// ============ PERFORMANCE: THROTTLED TV STATIC ============
+// ============ REALISTIC TV STATIC (hero + loader only) ============
 function createStaticCanvas(canvasId) {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
     const ctx = canvas.getContext('2d', { alpha: false });
-    const SCALE = 4;
+    const SCALE = 2; // finer grain for realism
     let w = 0, h = 0, imageData = null;
 
     function resize() {
@@ -16,27 +16,50 @@ function createStaticCanvas(canvasId) {
     window.addEventListener('resize', resize);
 
     let lastFrame = 0;
+    let bandOffset = 0;
+
     function drawStatic(time) {
         requestAnimationFrame(drawStatic);
-        if (time - lastFrame < 100) return;
+        if (time - lastFrame < 66) return; // ~15fps for that flickery CRT feel
         lastFrame = time;
         const data = imageData.data;
-        for (let i = 0; i < data.length; i += 16) {
-            const v = (Math.random() * 255) | 0;
-            data[i] = v; data[i+1] = v; data[i+2] = v; data[i+3] = 255;
-            if (i+4 < data.length) { data[i+4] = v; data[i+5] = v; data[i+6] = v; data[i+7] = 255; }
-            if (i+8 < data.length) { data[i+8] = v; data[i+9] = v; data[i+10] = v; data[i+11] = 255; }
-            if (i+12 < data.length) { data[i+12] = v; data[i+13] = v; data[i+14] = v; data[i+15] = 255; }
+        const rowBytes = w * 4;
+
+        // Random horizontal band (interference artifact)
+        const hasBand = Math.random() < 0.3;
+        const bandY = hasBand ? ((Math.random() * h) | 0) : -1;
+        const bandHeight = hasBand ? (2 + (Math.random() * 6) | 0) : 0;
+        bandOffset = (bandOffset + (Math.random() * 3 - 1)) | 0;
+
+        for (let y = 0; y < h; y++) {
+            const rowStart = y * rowBytes;
+            // Horizontal scan line darkening — every other line is dimmer
+            const scanDim = (y & 1) ? 0.7 : 1.0;
+            // Horizontal band artifact — bright interference bar
+            const inBand = hasBand && y >= bandY && y < bandY + bandHeight;
+            const bandBoost = inBand ? 40 + (Math.random() * 30) : 0;
+
+            for (let x = 0; x < w; x++) {
+                const i = rowStart + x * 4;
+                // Per-pixel noise with slight horizontal correlation
+                let v = (Math.random() * 180) | 0;
+                // Cluster adjacent pixels slightly (horizontal smear like real analog)
+                if (x > 0 && Math.random() < 0.3) {
+                    v = (v * 0.6 + data[i - 4] * 0.4) | 0;
+                }
+                v = ((v * scanDim + bandBoost) | 0);
+                if (v > 255) v = 255;
+                data[i] = v; data[i + 1] = v; data[i + 2] = v; data[i + 3] = 255;
+            }
         }
         ctx.putImageData(imageData, 0, 0);
     }
     requestAnimationFrame(drawStatic);
 }
 
+// Only create static for loader and hero — NOT portfolio or CTA
 createStaticCanvas('loaderStatic');
 createStaticCanvas('heroStatic');
-createStaticCanvas('portfolioStatic');
-createStaticCanvas('ctaStatic');
 
 // ============ VIBRANT MULTI-COLOR CODE RAIN ============
 function createCodeRain(canvasId) {
