@@ -61,61 +61,101 @@ function createStaticCanvas(canvasId) {
 createStaticCanvas('loaderStatic');
 createStaticCanvas('heroStatic');
 
-// ============ BROKEN WINDOW REVEAL — CRACKED GLASS + FALLING SYMBOLS ============
+// ============ BULLET HOLE REVEAL — JAGGED GLASS + RADIATING CRACKS ============
 function createBinaryReveal(canvasId) {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     const section = canvas.closest('section') || canvas.parentElement;
 
-    const GAP_X = 30;
-    const GAP_Y = 24;
+    const GAP_X = 28;
+    const GAP_Y = 22;
     const FONT_SIZE = 13;
-    const HOLE_R = 220;       // inner clear hole radius
-    const CRACK_R = 340;      // outer crack reach
+    const BASE_R = 160;        // average hole radius
+    const CRACK_R = 420;       // how far cracks reach
     const FALL_SPEED = 0.4;
     const MORPH_CHANCE = 0.03;
     const SYMBOLS = '01{}()<>+-=.:;|/\\01010101アイウエオカキクケコ';
+    const NUM_HOLE_PTS = 24;   // jagged polygon vertices
     let cols = 0, rows = 0, cells = [];
 
-    // Generate jagged crack lines radiating from center of hole
+    // Jagged bullet hole polygon — irregular shape, NOT a circle
+    let holePoints = [];       // {angle, baseR, wobbleSpeed, wobbleAmp}
     let cracks = [];
+
+    function buildHole() {
+        holePoints = [];
+        for (let i = 0; i < NUM_HOLE_PTS; i++) {
+            const angle = (i / NUM_HOLE_PTS) * Math.PI * 2;
+            // Each vertex has a different radius — creates jagged irregular shape
+            const rVariance = BASE_R * (0.55 + Math.random() * 0.65);
+            // Some vertices punch inward sharply (like real bullet impact)
+            const isPunch = Math.random() < 0.3;
+            const r = isPunch ? rVariance * 0.6 : rVariance;
+            holePoints.push({
+                angle: angle,
+                baseR: r,
+                wobbleSpeed: 0.3 + Math.random() * 0.7,
+                wobbleAmp: 2 + Math.random() * 5,
+                phase: Math.random() * Math.PI * 2,
+            });
+        }
+    }
+
+    // Build crack lines radiating outward from hole edge
     function buildCracks() {
         cracks = [];
-        const NUM_CRACKS = 14 + (Math.random() * 6 | 0);
+        const NUM_CRACKS = 16 + (Math.random() * 8 | 0);
         for (let i = 0; i < NUM_CRACKS; i++) {
-            const angle = (i / NUM_CRACKS) * Math.PI * 2 + (Math.random() - 0.5) * 0.4;
-            const len = HOLE_R * 0.7 + Math.random() * (CRACK_R - HOLE_R) * 0.9;
+            const angle = (i / NUM_CRACKS) * Math.PI * 2 + (Math.random() - 0.5) * 0.5;
+            // Start from hole edge, extend outward
+            const startR = BASE_R * 0.7;
+            const endR = startR + 60 + Math.random() * (CRACK_R - startR - 60);
             const segments = [];
-            const steps = 5 + (Math.random() * 4 | 0);
+            const steps = 4 + (Math.random() * 5 | 0);
             for (let s = 0; s <= steps; s++) {
                 const t = s / steps;
-                const r = HOLE_R * 0.85 + t * (len - HOLE_R * 0.85);
-                const jitter = (Math.random() - 0.5) * 28 * t;
+                const r = startR + t * (endR - startR);
+                const jitter = (Math.random() - 0.5) * 35 * t;
+                const aJitter = (Math.random() - 0.5) * 0.15 * t;
                 segments.push({
-                    dx: Math.cos(angle + jitter * 0.01) * r + jitter,
-                    dy: Math.sin(angle + jitter * 0.01) * r + jitter * 0.7,
+                    dx: Math.cos(angle + aJitter) * r + jitter,
+                    dy: Math.sin(angle + aJitter) * r + jitter * 0.8,
                 });
             }
-            // Sub-branches
+            // Fork branches
             const branches = [];
-            if (Math.random() < 0.6) {
-                const branchAt = 1 + (Math.random() * (steps - 2) | 0);
-                const brAngle = angle + (Math.random() - 0.5) * 1.2;
-                const brLen = 30 + Math.random() * 60;
-                const brSteps = 3;
-                const origin = segments[branchAt];
+            if (Math.random() < 0.55) {
+                const branchIdx = 1 + (Math.random() * (steps - 1) | 0);
+                const brAngle = angle + (Math.random() > 0.5 ? 1 : -1) * (0.3 + Math.random() * 0.8);
+                const brLen = 25 + Math.random() * 70;
+                const origin = segments[Math.min(branchIdx, segments.length - 1)];
                 const brSegs = [{ dx: origin.dx, dy: origin.dy }];
-                for (let b = 1; b <= brSteps; b++) {
-                    const bt = b / brSteps;
+                for (let b = 1; b <= 3; b++) {
+                    const bt = b / 3;
                     brSegs.push({
-                        dx: origin.dx + Math.cos(brAngle) * brLen * bt + (Math.random() - 0.5) * 12,
-                        dy: origin.dy + Math.sin(brAngle) * brLen * bt + (Math.random() - 0.5) * 8,
+                        dx: origin.dx + Math.cos(brAngle) * brLen * bt + (Math.random() - 0.5) * 15,
+                        dy: origin.dy + Math.sin(brAngle) * brLen * bt + (Math.random() - 0.5) * 10,
                     });
                 }
                 branches.push(brSegs);
             }
-            cracks.push({ segments, branches, width: 1 + Math.random() * 1.5 });
+            // Secondary fork
+            if (Math.random() < 0.3 && segments.length > 3) {
+                const branchIdx = 2 + (Math.random() * (steps - 3) | 0);
+                const brAngle = angle + (Math.random() > 0.5 ? 1 : -1) * (0.4 + Math.random() * 0.6);
+                const brLen = 20 + Math.random() * 40;
+                const origin = segments[Math.min(branchIdx, segments.length - 1)];
+                const brSegs = [{ dx: origin.dx, dy: origin.dy }];
+                for (let b = 1; b <= 2; b++) {
+                    brSegs.push({
+                        dx: origin.dx + Math.cos(brAngle) * brLen * (b / 2) + (Math.random() - 0.5) * 10,
+                        dy: origin.dy + Math.sin(brAngle) * brLen * (b / 2) + (Math.random() - 0.5) * 8,
+                    });
+                }
+                branches.push(brSegs);
+            }
+            cracks.push({ segments, branches, width: 0.8 + Math.random() * 1.8 });
         }
     }
 
@@ -140,6 +180,7 @@ function createBinaryReveal(canvasId) {
         canvas.width = canvas.offsetWidth;
         canvas.height = canvas.offsetHeight;
         buildGrid();
+        buildHole();
         buildCracks();
     }
     resize();
@@ -154,64 +195,124 @@ function createBinaryReveal(canvasId) {
     });
     section.addEventListener('mouseleave', () => { mx = -9999; my = -9999; });
 
-    // Draw cracked glass edges around the hole
-    function drawCracks() {
+    // Get the current jagged hole polygon path (animated)
+    function getHolePath(time) {
+        const pts = [];
+        for (let i = 0; i < holePoints.length; i++) {
+            const p = holePoints[i];
+            const wobble = Math.sin(time * 0.001 * p.wobbleSpeed + p.phase) * p.wobbleAmp;
+            const r = p.baseR + wobble;
+            pts.push({
+                x: Math.cos(p.angle) * r,
+                y: Math.sin(p.angle) * r,
+            });
+        }
+        return pts;
+    }
+
+    // Check if a point is inside the jagged polygon (ray casting)
+    function pointInHole(px, py, holePts) {
+        let inside = false;
+        for (let i = 0, j = holePts.length - 1; i < holePts.length; j = i++) {
+            const xi = holePts[i].x, yi = holePts[i].y;
+            const xj = holePts[j].x, yj = holePts[j].y;
+            if (((yi > py) !== (yj > py)) && (px < (xj - xi) * (py - yi) / (yj - yi) + xi)) {
+                inside = !inside;
+            }
+        }
+        return inside;
+    }
+
+    // Build canvas path from hole polygon
+    function traceHolePath(holePts) {
+        ctx.beginPath();
+        ctx.moveTo(holePts[0].x, holePts[0].y);
+        // Use quadratic curves between points for organic jagged edges
+        for (let i = 1; i <= holePts.length; i++) {
+            const cur = holePts[i % holePts.length];
+            const prev = holePts[(i - 1) % holePts.length];
+            const cpx = (prev.x + cur.x) / 2 + (Math.random() - 0.5) * 6;
+            const cpy = (prev.y + cur.y) / 2 + (Math.random() - 0.5) * 6;
+            ctx.quadraticCurveTo(cpx, cpy, cur.x, cur.y);
+        }
+        ctx.closePath();
+    }
+
+    // Draw cracked glass around the hole
+    function drawCracks(time) {
         if (mx < -999) return;
         ctx.save();
         ctx.translate(mx, my);
 
-        // Draw each crack line
-        for (let i = 0; i < cracks.length; i++) {
-            const crack = cracks[i];
+        // Radiating crack lines
+        for (const crack of cracks) {
             const segs = crack.segments;
-
-            // Main crack line
+            // Main crack
             ctx.beginPath();
             ctx.moveTo(segs[0].dx, segs[0].dy);
             for (let s = 1; s < segs.length; s++) {
                 ctx.lineTo(segs[s].dx, segs[s].dy);
             }
-            ctx.strokeStyle = 'rgba(80, 90, 100, 0.6)';
+            ctx.strokeStyle = 'rgba(180, 190, 200, 0.5)';
             ctx.lineWidth = crack.width;
             ctx.stroke();
 
-            // Thin white highlight beside crack (glass refraction)
+            // White refraction highlight offset by 1px
             ctx.beginPath();
-            ctx.moveTo(segs[0].dx + 1, segs[0].dy + 1);
+            ctx.moveTo(segs[0].dx + 1.5, segs[0].dy + 1);
             for (let s = 1; s < segs.length; s++) {
-                ctx.lineTo(segs[s].dx + 1, segs[s].dy + 1);
+                ctx.lineTo(segs[s].dx + 1.5, segs[s].dy + 1);
             }
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
             ctx.lineWidth = 0.5;
             ctx.stroke();
 
-            // Sub-branches
+            // Branches
             for (const br of crack.branches) {
                 ctx.beginPath();
                 ctx.moveTo(br[0].dx, br[0].dy);
-                for (let b = 1; b < br.length; b++) {
-                    ctx.lineTo(br[b].dx, br[b].dy);
-                }
-                ctx.strokeStyle = 'rgba(80, 90, 100, 0.4)';
-                ctx.lineWidth = 0.8;
+                for (let b = 1; b < br.length; b++) ctx.lineTo(br[b].dx, br[b].dy);
+                ctx.strokeStyle = 'rgba(160, 170, 180, 0.35)';
+                ctx.lineWidth = 0.7;
                 ctx.stroke();
             }
         }
 
-        // Concentric ring cracks (spider web pattern)
-        for (let ring = 0; ring < 3; ring++) {
-            const r = HOLE_R * (0.9 + ring * 0.25);
+        // Concentric spider web rings (3 rings with jitter)
+        for (let ring = 0; ring < 4; ring++) {
+            const ringR = BASE_R * (0.8 + ring * 0.35);
             ctx.beginPath();
-            for (let a = 0; a < Math.PI * 2; a += 0.05) {
-                const jit = (Math.random() - 0.5) * 6;
-                const px = Math.cos(a) * (r + jit);
-                const py = Math.sin(a) * (r + jit);
+            const ringSteps = 60;
+            for (let a = 0; a <= ringSteps; a++) {
+                const angle = (a / ringSteps) * Math.PI * 2;
+                const jit = (Math.sin(angle * 7 + ring) * 4) + (Math.sin(time * 0.0005 + angle * 3) * 2);
+                const px = Math.cos(angle) * (ringR + jit);
+                const py = Math.sin(angle) * (ringR + jit);
                 if (a === 0) ctx.moveTo(px, py);
                 else ctx.lineTo(px, py);
             }
             ctx.closePath();
-            ctx.strokeStyle = `rgba(80, 90, 100, ${0.35 - ring * 0.1})`;
-            ctx.lineWidth = 1 - ring * 0.2;
+            ctx.strokeStyle = `rgba(180, 190, 200, ${0.3 - ring * 0.06})`;
+            ctx.lineWidth = 1.2 - ring * 0.2;
+            ctx.stroke();
+        }
+
+        // Glass shard fragments near hole edge (small triangles)
+        for (let i = 0; i < 8; i++) {
+            const a = (i / 8) * Math.PI * 2 + Math.sin(time * 0.0003 + i) * 0.1;
+            const r = BASE_R * (0.7 + Math.sin(i * 1.7) * 0.15);
+            const cx = Math.cos(a) * r;
+            const cy = Math.sin(a) * r;
+            const sz = 6 + (i % 3) * 4;
+            ctx.beginPath();
+            ctx.moveTo(cx - sz * 0.5, cy - sz * 0.3);
+            ctx.lineTo(cx + sz * 0.4, cy - sz * 0.1);
+            ctx.lineTo(cx + sz * 0.1, cy + sz * 0.4);
+            ctx.closePath();
+            ctx.fillStyle = `rgba(200, 210, 220, ${0.06 + Math.sin(time * 0.002 + i) * 0.03})`;
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(200, 210, 220, 0.2)';
+            ctx.lineWidth = 0.5;
             ctx.stroke();
         }
 
@@ -221,12 +322,12 @@ function createBinaryReveal(canvasId) {
     // Dark edge vignette
     function drawEdgeVignette() {
         const w = canvas.width, h = canvas.height;
-        const grad = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.2, w / 2, h / 2, Math.max(w, h) * 0.72);
+        const grad = ctx.createRadialGradient(w / 2, h / 2, Math.min(w, h) * 0.15, w / 2, h / 2, Math.max(w, h) * 0.7);
         grad.addColorStop(0, 'rgba(255,255,255,0)');
-        grad.addColorStop(0.45, 'rgba(210,210,210,0.12)');
-        grad.addColorStop(0.7, 'rgba(120,120,120,0.35)');
-        grad.addColorStop(0.9, 'rgba(40,40,40,0.65)');
-        grad.addColorStop(1, 'rgba(10,10,10,0.82)');
+        grad.addColorStop(0.4, 'rgba(220,220,220,0.08)');
+        grad.addColorStop(0.65, 'rgba(140,140,140,0.3)');
+        grad.addColorStop(0.85, 'rgba(50,50,50,0.6)');
+        grad.addColorStop(1, 'rgba(10,10,10,0.85)');
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, w, h);
     }
@@ -234,7 +335,7 @@ function createBinaryReveal(canvasId) {
     let last = 0;
     function draw(t) {
         requestAnimationFrame(draw);
-        if (t - last < 40) return;
+        if (t - last < 33) return; // ~30fps
         last = t;
 
         const W = canvas.width, H = canvas.height;
@@ -243,69 +344,83 @@ function createBinaryReveal(canvasId) {
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, W, H);
 
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.font = FONT_SIZE + 'px monospace';
+        if (mx > -999) {
+            // Get animated jagged hole shape
+            const holePts = getHolePath(t);
 
-        const R = HOLE_R;
-        const R2 = R * R;
+            // Draw dark void + falling symbols CLIPPED to jagged hole
+            ctx.save();
+            ctx.translate(mx, my);
+            traceHolePath(holePts);
+            ctx.clip();
 
-        // Update + draw cells ONLY inside the broken hole
-        for (let c = 0; c < cols; c++) {
-            const col = cells[c];
-            const baseX = c * GAP_X + GAP_X / 2;
+            // Dark void behind the text
+            ctx.fillStyle = '#060812';
+            ctx.fillRect(-BASE_R * 1.5, -BASE_R * 1.5, BASE_R * 3, BASE_R * 3);
 
-            for (let r = 0; r < rows; r++) {
-                const cell = col[r];
-                cell.yOff += cell.speed;
-                if (Math.random() < MORPH_CHANCE) {
-                    cell.ch = SYMBOLS[Math.random() * SYMBOLS.length | 0];
+            // Falling + morphing symbols inside the hole
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.font = FONT_SIZE + 'px monospace';
+
+            for (let c = 0; c < cols; c++) {
+                const col = cells[c];
+                const baseX = c * GAP_X + GAP_X / 2 - mx;
+
+                for (let r = 0; r < rows; r++) {
+                    const cell = col[r];
+                    cell.yOff += cell.speed;
+                    if (Math.random() < MORPH_CHANCE) {
+                        cell.ch = SYMBOLS[Math.random() * SYMBOLS.length | 0];
+                    }
+                    if (cell.yOff >= GAP_Y) {
+                        cell.yOff -= GAP_Y;
+                        cell.ch = SYMBOLS[Math.random() * SYMBOLS.length | 0];
+                    }
+
+                    const drawY = r * GAP_Y + GAP_Y / 2 + cell.yOff - my;
+                    if (drawY < -BASE_R * 1.5 || drawY > BASE_R * 1.5) continue;
+                    if (baseX < -BASE_R * 1.5 || baseX > BASE_R * 1.5) continue;
+
+                    // Brightness falloff from center
+                    const d = Math.sqrt(baseX * baseX + drawY * drawY);
+                    const alpha = Math.max(0, 1 - d / (BASE_R * 1.1)) * 0.9;
+                    if (alpha <= 0) continue;
+
+                    const green = 80 + (1 - d / BASE_R) * 175;
+                    ctx.fillStyle = `rgba(${20 + (Math.random() * 15 | 0)}, ${green | 0}, ${40 + (Math.random() * 20 | 0)}, ${alpha})`;
+                    ctx.fillText(cell.ch, baseX, drawY);
                 }
-                if (cell.yOff >= GAP_Y) {
-                    cell.yOff -= GAP_Y;
-                    cell.ch = SYMBOLS[Math.random() * SYMBOLS.length | 0];
+            }
+
+            ctx.restore();
+
+            // Jagged hole border — frosted glass edge glow
+            ctx.save();
+            ctx.translate(mx, my);
+            traceHolePath(holePts);
+            ctx.strokeStyle = 'rgba(200, 210, 220, 0.6)';
+            ctx.lineWidth = 2.5;
+            ctx.shadowColor = 'rgba(200, 220, 255, 0.4)';
+            ctx.shadowBlur = 12;
+            ctx.stroke();
+            ctx.restore();
+
+            // Draw all the radiating cracks + spider web rings
+            drawCracks(t);
+        } else {
+            // Update cells even when mouse is off so they don't freeze
+            for (let c = 0; c < cols; c++) {
+                for (let r = 0; r < rows; r++) {
+                    const cell = cells[c][r];
+                    cell.yOff += cell.speed;
+                    if (cell.yOff >= GAP_Y) { cell.yOff -= GAP_Y; cell.ch = SYMBOLS[Math.random() * SYMBOLS.length | 0]; }
+                    if (Math.random() < MORPH_CHANCE) cell.ch = SYMBOLS[Math.random() * SYMBOLS.length | 0];
                 }
-
-                const drawY = r * GAP_Y + GAP_Y / 2 + cell.yOff;
-                if (drawY < -GAP_Y || drawY > H + GAP_Y) continue;
-
-                // Only visible through the broken hole
-                const dx = baseX - mx;
-                const dy = drawY - my;
-                const d2 = dx * dx + dy * dy;
-                if (d2 > R2) continue;
-
-                const dist = Math.sqrt(d2);
-                const prox = 1 - dist / R;
-                // Sharp edge — visible almost to the edge, then sharp cutoff
-                const alpha = Math.min(1, prox * 2.5) * 0.85;
-
-                ctx.fillStyle = '#0a1628';
-                ctx.globalAlpha = alpha;
-                ctx.fillText(cell.ch, baseX, drawY);
             }
         }
-        ctx.globalAlpha = 1;
 
-        // Dark background visible through hole (behind the text)
-        if (mx > -999) {
-            ctx.save();
-            ctx.globalCompositeOperation = 'destination-over';
-            const holeGrad = ctx.createRadialGradient(mx, my, 0, mx, my, R);
-            holeGrad.addColorStop(0, 'rgba(6, 8, 18, 0.92)');
-            holeGrad.addColorStop(0.8, 'rgba(6, 8, 18, 0.85)');
-            holeGrad.addColorStop(1, 'rgba(6, 8, 18, 0)');
-            ctx.fillStyle = holeGrad;
-            ctx.beginPath();
-            ctx.arc(mx, my, R, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
-        }
-
-        // Draw cracked glass edges
-        drawCracks();
-
-        // Dark edge vignette — shady overall
+        // Dark shady edge vignette — always drawn
         drawEdgeVignette();
     }
     requestAnimationFrame(draw);
